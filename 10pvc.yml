@@ -1,0 +1,48 @@
+---
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: datadir-mariadb-0
+  namespace: mysql
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 100Mi
+  selector:
+    matchLabels:
+      app: mariadb
+      petindex: "0"
+---
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: datadir-mariadb-1
+  namespace: mysql
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 100Mi
+  selector:
+    matchLabels:
+      app: mariadb
+      petindex: "1"
+---
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: datadir-mariadb-2
+  namespace: mysql
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 100Mi
+  selector:
+    matchLabels:
+      app: mariadb
+      petindex: "2"
