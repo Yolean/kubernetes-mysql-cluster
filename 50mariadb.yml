@@ -21,7 +21,28 @@ spec:
         ports:
         - containerPort: 3306
           name: mysql
+        - containerPort: 4444
+          name: sst
+        - containerPort: 4567
+          name: replication
+        - containerPort: 4568
+          name: ist
+        env:
+        - name: MYSQL_ROOT_PASSWORD
+          value: todo-get-from-secret
+          #valueFrom:
+          #  secretKeyRef:
+          #    name: postgres
+          #    key: rootpw
         command: ['sh','-c','exec tail -f /dev/null']
+        # mysql_install_db --user=mysql --datadir=/var/lib/mysql
+        # gosu mysql mysqld --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci --wsrep-new-cluster
+        # gosu mysql mysqld --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci --wsrep_cluster_address=gcomm://mariadb-0.mariadb
+        args:
+        - --character-set-server=utf8mb4
+        - --collation-server=utf8mb4_unicode_ci
+        - --wsrep-new-cluster
+        - --wsrep_cluster_address=gcomm://mariadb-0.mariadb
         volumeMounts:
         - name: datadir
           mountPath: /var/lib/mysql
