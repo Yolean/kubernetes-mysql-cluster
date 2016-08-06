@@ -25,6 +25,9 @@ spec:
           name: sst
         - containerPort: 4567
           name: replication
+        - containerPort: 4567
+          protocol: UDP
+          name: replicationudp
         - containerPort: 4568
           name: ist
         env:
