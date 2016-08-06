@@ -37,6 +37,8 @@ spec:
           #  secretKeyRef:
           #    name: postgres
           #    key: rootpw
+        - name: MYSQL_INITDB_SKIP_TZINFO
+          value: yes
         command: ['sh','-c','exec tail -f /dev/null']
         # mysql_install_db --user=mysql --datadir=/var/lib/mysql
         # gosu mysql mysqld --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci --wsrep-new-cluster
@@ -55,7 +57,8 @@ spec:
           mountPath: /docker-entrypoint-initdb.d
       volumes:
       - name: conf
-        emptyDir: {}
+        configMap:
+          name: conf-d
       - name: initdb
         emptyDir: {}
   volumeClaimTemplates:

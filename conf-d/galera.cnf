@@ -1,0 +1,46 @@
+# Copy-paste from http://serverfault.com/questions/751306/galera-cluster-mariadb-on-docker-coreos-second-node-doesnt-work-on-first-att
+# https://mariadb.com/kb/en/mariadb/galera-cluster-system-variables/#mariadb-galera-cluster-configuration-variables
+
+# this is read by the standalone daemon and embedded servers
+[server]
+
+# this is only for the mysqld standalone daemon
+[mysqld]
+
+#
+# * Galera-related settings
+#
+[galera]
+# Mandatory settings
+wsrep_on=ON
+wsrep_provider="/usr/lib/galera/libgalera_smm.so"
+wsrep_cluster_address="gcomm://10.2.0.4,10.2.0.5"
+binlog_format=row
+default_storage_engine=InnoDB
+innodb_autoinc_lock_mode=2
+innodb_locks_unsafe_for_binlog=1
+query_cache_size=0
+query_cache_type=0
+wsrep-sst-method=rsync
+
+#
+# Allow server to accept connections on all interfaces.
+#
+bind-address=0.0.0.0
+#
+# Optional setting
+#wsrep_slave_threads=1
+#innodb_flush_log_at_trx_commit=0
+
+# this is only for embedded server
+[embedded]
+
+# This group is only read by MariaDB servers, not by MySQL.
+# If you use the same .cnf file for MySQL and MariaDB,
+# you can put MariaDB-only options here
+[mariadb]
+
+# This group is only read by MariaDB-10.1 servers.
+# If you use the same .cnf file for MariaDB of different versions,
+# use this group for options that older servers don't understand
+[mariadb-10.1]
