@@ -1,6 +1,3 @@
-# Copy-paste from http://serverfault.com/questions/751306/galera-cluster-mariadb-on-docker-coreos-second-node-doesnt-work-on-first-att
-# https://mariadb.com/kb/en/mariadb/galera-cluster-system-variables/#mariadb-galera-cluster-configuration-variables
-
 # this is read by the standalone daemon and embedded servers
 [server]
 
@@ -10,11 +7,13 @@
 #
 # * Galera-related settings
 #
+# https://mariadb.com/kb/en/mariadb/galera-cluster-system-variables/
+#
 [galera]
 # Mandatory settings
 wsrep_on=ON
 wsrep_provider="/usr/lib/galera/libgalera_smm.so"
-wsrep_cluster_address="gcomm://10.2.0.4,10.2.0.5"
+wsrep_cluster_address="gcomm://mariadb-0.mariadb,mariadb-1.mariadb,mariadb-2.mariadb"
 binlog_format=row
 default_storage_engine=InnoDB
 innodb_autoinc_lock_mode=2

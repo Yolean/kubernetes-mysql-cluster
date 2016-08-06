@@ -21,7 +21,7 @@ spec:
     name: replicationudp
   - port: 4568
     name: ist
-  # [podname].mariadb.default.svc.cluster.local
+  # [podname].mariadb.mysql.svc.cluster.local
   clusterIP: None
   selector:
     app: mariadb
