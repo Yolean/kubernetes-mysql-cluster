@@ -32,11 +32,10 @@ spec:
           name: ist
         env:
         - name: MYSQL_ROOT_PASSWORD
-          value: todo-get-from-secret
-          #valueFrom:
-          #  secretKeyRef:
-          #    name: postgres
-          #    key: rootpw
+          valueFrom:
+            secretKeyRef:
+              name: mysql-secret
+              key: rootpw
         - name: MYSQL_INITDB_SKIP_TZINFO
           value: "yes"
         # Init persistent volumes manually with kubectl exec:
