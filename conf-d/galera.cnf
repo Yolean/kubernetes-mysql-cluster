@@ -17,8 +17,6 @@ wsrep_cluster_address="gcomm://mariadb-0.mariadb,mariadb-1.mariadb,mariadb-2.mar
 binlog_format=ROW
 default_storage_engine=InnoDB
 innodb_autoinc_lock_mode=2
-query_cache_size=0
-query_cache_type=0
 wsrep-sst-method=rsync
 
 #
