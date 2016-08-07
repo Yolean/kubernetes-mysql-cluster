@@ -42,8 +42,6 @@ spec:
         #command: ['sh','-c','exec tail -f /dev/null']
         #- mysql_install_db --user=mysql --datadir=/var/lib/mysql
         args:
-        - --character-set-server=utf8mb4
-        - --collation-server=utf8mb4_unicode_ci
         # Uncomment for bootstrapping first pod in a cluster, but set replicas:1 above first
         #- --wsrep-new-cluster
         volumeMounts:
