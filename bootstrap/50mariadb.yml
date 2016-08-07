@@ -5,7 +5,7 @@ metadata:
   namespace: mysql
 spec:
   serviceName: "mariadb"
-  replicas: 3
+  replicas: 1
   template:
     metadata:
       labels:
@@ -38,6 +38,11 @@ spec:
               key: rootpw
         - name: MYSQL_INITDB_SKIP_TZINFO
           value: "yes"
+        # Init persistent volumes manually with kubectl exec (was used to troubleshoot for https://github.com/kubernetes/minikube/issues/2):
+        #command: ['sh','-c','exec tail -f /dev/null']
+        #- mysql_install_db --user=mysql --datadir=/var/lib/mysql
+        args:
+        - --wsrep-new-cluster
         volumeMounts:
         - name: datadir
           mountPath: /var/lib/mysql
