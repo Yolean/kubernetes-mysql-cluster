@@ -14,10 +14,8 @@
 wsrep_on=ON
 wsrep_provider="/usr/lib/galera/libgalera_smm.so"
 wsrep_cluster_address="gcomm://mariadb-0.mariadb,mariadb-1.mariadb,mariadb-2.mariadb"
-binlog_format=row
 default_storage_engine=InnoDB
 innodb_autoinc_lock_mode=2
-innodb_locks_unsafe_for_binlog=1
 query_cache_size=0
 query_cache_type=0
 wsrep-sst-method=rsync
