@@ -38,6 +38,9 @@ spec:
               key: rootpw
         - name: MYSQL_INITDB_SKIP_TZINFO
           value: "yes"
+        args:
+        - --character-set-server=utf8mb4
+        - --collation-server=utf8mb4_unicode_ci
         volumeMounts:
         - name: datadir
           mountPath: /var/lib/mysql
