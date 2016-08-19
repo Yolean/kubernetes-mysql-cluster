@@ -97,9 +97,19 @@ and the manual cluster setup wasn't a big deal.
 
 ### phpMyAdmin
 
+Carefully consider the security implications before you create this. Note that it uses a non-official image.
+
 ```
-# For phpMyAdmin. Insecure.
-kubectl exec mariadb-0 -- mysql -e "GRANT ALL PRIVILEGES ON *.* TO 'root'@'%' IDENTIFIED BY '[rootpw]' WITH GRANT OPTION;"
+kubectl create -f myadmin/
+```
+
+PhpMyAdmin has a login page where you need a mysql user. The default for root is localhost-only access (the merits of this in a micorservices context can be discussed). To allow root login from phpMyAdmin:
+
+```
+# enter pod
+kubectl exec -ti mariadb-0 -- /bin/bash
+# inside pod
+mysql --password=$MYSQL_ROOT_PASSWORD -e "GRANT ALL PRIVILEGES ON *.* TO 'root'@'%' IDENTIFIED BY '$MYSQL_ROOT_PASSWORD' WITH GRANT OPTION;
 ```
 
 ### Healthz
