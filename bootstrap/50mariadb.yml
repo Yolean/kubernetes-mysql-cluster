@@ -38,6 +38,12 @@ spec:
               key: rootpw
         - name: MYSQL_INITDB_SKIP_TZINFO
           value: "yes"
+        - name: MYSQL_DATABASE
+          value: keycloak
+        - name: MYSQL_USER
+          value: keycloak
+        - name: MYSQL_PASSWORD
+          value: keycloak
         # Init persistent volumes manually with kubectl exec (was used to troubleshoot for https://github.com/kubernetes/minikube/issues/2):
         #command: ['sh','-c','exec tail -f /dev/null']
         #- mysql_install_db --user=mysql --datadir=/var/lib/mysql
