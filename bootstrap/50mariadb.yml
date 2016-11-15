@@ -45,8 +45,10 @@ spec:
         - name: MYSQL_PASSWORD
           value: keycloak
         # Init persistent volumes manually with kubectl exec (was used to troubleshoot for https://github.com/kubernetes/minikube/issues/2):
-        #command: ['sh','-c','exec tail -f /dev/null']
-        #- mysql_install_db --user=mysql --datadir=/var/lib/mysql
+        #command:
+        #  - mysql_install_db
+        #  - --user=mysql
+        #  - --datadir=/var/lib/mysql
         args:
         - --wsrep-new-cluster
         #- --character-set-server=utf8mb4
