@@ -119,3 +119,16 @@ This is a TODO. The healthz folder is a copy of https://github.com/kubernetes/co
 ### Storage
 
 Why we request only 100 Mb storage? We aim to learn to monitor our volumes and [resize](https://cloud.google.com/sdk/gcloud/reference/compute/disks/resize) on demand. For hostPath volumes the size doesn't matter, as long as PV and PVC sizes match.
+
+## Sample frontend
+
+Keycloak is a quite interesting frontend as it depends heavily on a HA database and has no other persistent storage. See the [meetup-demo branch]() of [keycloak-ha-kubernetes]().
+
+```
+# cd to that repo
+kubectl create -f server-ha-mysql/kubernetes-example.yml
+# note the different namespaces
+kubectl -n mysql get pods
+kubectl -n keycloak get pods
+kubectl -n scale --replicas=3 deployment/kc
+```
