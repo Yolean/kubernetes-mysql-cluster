@@ -31,6 +31,12 @@ spec:
         - containerPort: 4568
           name: ist
         env:
+        - name: MYSQL_DATABASE
+          value: keycloak
+        - name: MYSQL_USER
+          value: keycloak
+        - name: MYSQL_PASSWORD
+          value: keycloak
         - name: MYSQL_ROOT_PASSWORD
           valueFrom:
             secretKeyRef:
@@ -43,8 +49,8 @@ spec:
         #- mysql_install_db --user=mysql --datadir=/var/lib/mysql
         args:
         - --wsrep-new-cluster
-        - --character-set-server=utf8mb4
-        - --collation-server=utf8mb4_unicode_ci
+        - --character-set-server=utf8
+        - --collation-server=utf8_unicode_ci
         volumeMounts:
         - name: datadir
           mountPath: /var/lib/mysql
