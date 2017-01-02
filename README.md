@@ -12,8 +12,8 @@ Initially we tried Postgres, but clustering solutions like [pgpool-II]() felt a 
 
 As of [MariaDB](https://mariadb.com/) [10.1](https://mariadb.com/kb/en/mariadb/what-is-mariadb-galera-cluster/) the [official docker image](https://hub.docker.com/_/mariadb/) comes with "wsrep" support. Using official images direcly mean less maintenance for us.
 
-Kubernetes [recently added](http://blog.kubernetes.io/2016/07/kubernetes-1.3-bridging-cloud-native-and-enterprise-workloads.html) support for "stateful applications", the [PetSet](http://kubernetes.io/docs/user-guide/petset/). There's a [semi-official](https://github.com/kubernetes/contrib/tree/master/pets/mysql) example using MySQL.
-It's more an example of what you can do with PetSet than a production setup.
+Kubernetes [recently added](http://blog.kubernetes.io/2016/07/kubernetes-1.3-bridging-cloud-native-and-enterprise-workloads.html) support for "stateful applications", the [StatefulSet](http://kubernetes.io/docs/user-guide/StatefulSet/). There's a [semi-official](https://github.com/kubernetes/contrib/tree/master/pets/mysql) example using MySQL.
+It's more an example of what you can do with StatefulSet than a production setup.
 It uses the init container concept, which looks heavily alpha, to try to automate installation.
 
 Using a semi-manual bootstrap process and a container with galera support built in, we were able to simplify the setup and thus the maintenance.
@@ -33,24 +33,23 @@ With 3 nodes we aim for the following characteristics, prioritizing consistency 
 
 ## Preparations
 
-Unless your Kubernetes setup has volume provisioning for PetSet (GKE has) you need to make sure the [Persistent Volumes](http://kubernetes.io/docs/user-guide/persistent-volumes/) exist first.
+Unless your Kubernetes setup has volume provisioning for StatefulSet (GKE has) you need to make sure the [Persistent Volumes](http://kubernetes.io/docs/user-guide/persistent-volumes/) exist first.
 
 Then:
  * Create namespace.
  * Create `10pvc.yml` if you created PVs manually.
  * Create configmap (see `40configmap.sh`) and secret (see `41secret.sh`).
- * Create petset's "headless" service `20mariadb-service.yml`.
+ * Create StatefulSet's "headless" service `20mariadb-service.yml`.
  * Create the service that other applications depend on `30mysql-service.yml`.
 
 After that start bootstrapping.
 
 ### Initialize volumes and cluster
 
-Bootstrapping uses a slightly modified copy of the PetSet definition, with a single replica and an added argument `--wsrep-new-cluster`. So don't `kubectl create` from `./50mariadb.yml` unless you already have a cluster running. Instead:
+First get a single instance with `--wsrep-new-cluster` up and running:
 
 ```
-kubectl create -f bootstrap/50mariadb.yml
-# wait for Running state, then
+kubectl create -f ./
 kubectl logs -f mariadb-0
 ```
 
@@ -67,16 +66,13 @@ You should see something like
   protocols  = 0/7/3 (gcs/repl/appl),
 ```
 
-Now keep that pod running, but change PetSet to create normal replicas.
+Now keep that pod running, but change StatefulSet to create normal replicas.
 
 ```
-kubectl delete -f bootstrap/50mariadb.yml
-kubectl create -f 50mariadb.yml
-# wait again, then
-kubectl logs -f mariadb-1
+./70unbootstrap.sh
 ```
 
-You might get a restart, but then something like
+This scales to three nodes. You can `kubectl logs -f mariadb-1` to see something like:
 
 ```
 [Note] WSREP: Quorum results:
@@ -89,11 +85,10 @@ You might get a restart, but then something like
 	protocols  = 0/7/3 (gcs/repl/appl),
 ```
 
-Now you can delete `mariadb-0` and it'll be re-created for you
-without the `--wsrep-new-cluster` argument.
+Now you can ```kubectl delete mariadb-0``` and it'll be re-created without the `--wsrep-new-cluster` argument. Logs will confirm that the new `mariadb-0` joins the cluster.
 
-Keep at least 1 node running at all times,
-and the manual cluster setup wasn't a big deal.
+Keep at least 1 node running at all times - which is what you want anyway,
+and the manual "unbootstrap" step isn't a big deal.
 
 ### phpMyAdmin
 
@@ -111,11 +106,3 @@ kubectl exec -ti mariadb-0 -- /bin/bash
 # inside pod
 mysql --password=$MYSQL_ROOT_PASSWORD -e "GRANT ALL PRIVILEGES ON *.* TO 'root'@'%' IDENTIFIED BY '$MYSQL_ROOT_PASSWORD' WITH GRANT OPTION;
 ```
-
-### Healthz
-
-This is a TODO. The healthz folder is a copy of https://github.com/kubernetes/contrib/tree/master/pets/mysql/healthz.
-
-### Storage
-
-Why we request only 100 Mb storage? We aim to learn to monitor our volumes and [resize](https://cloud.google.com/sdk/gcloud/reference/compute/disks/resize) on demand. For hostPath volumes the size doesn't matter, as long as PV and PVC sizes match.
