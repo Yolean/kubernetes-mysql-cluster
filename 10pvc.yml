@@ -2,14 +2,14 @@
 kind: PersistentVolumeClaim
 apiVersion: v1
 metadata:
-  name: datadir-mariadb-0
+  name: mysql-mariadb-0
   namespace: mysql
 spec:
   accessModes:
     - ReadWriteOnce
   resources:
     requests:
-      storage: 100Mi
+      storage: 10Gi
   selector:
     matchLabels:
       app: mariadb
@@ -18,14 +18,14 @@ spec:
 kind: PersistentVolumeClaim
 apiVersion: v1
 metadata:
-  name: datadir-mariadb-1
+  name: mysql-mariadb-1
   namespace: mysql
 spec:
   accessModes:
     - ReadWriteOnce
   resources:
     requests:
-      storage: 100Mi
+      storage: 10Gi
   selector:
     matchLabels:
       app: mariadb
@@ -34,14 +34,14 @@ spec:
 kind: PersistentVolumeClaim
 apiVersion: v1
 metadata:
-  name: datadir-mariadb-2
+  name: mysql-mariadb-2
   namespace: mysql
 spec:
   accessModes:
     - ReadWriteOnce
   resources:
     requests:
-      storage: 100Mi
+      storage: 10Gi
   selector:
     matchLabels:
       app: mariadb

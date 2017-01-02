@@ -10,4 +10,3 @@ spec:
     protocol: TCP
   selector:
     app: myadmin
-  type: NodePort

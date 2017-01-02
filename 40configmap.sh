@@ -1,1 +1,4 @@
-kubectl create configmap conf-d --from-file=conf-d --namespace=mysql
+#!/bin/bash
+DIR=`dirname "$BASH_SOURCE"`
+
+kubectl create configmap "conf-d" --from-file="$DIR/conf-d/" --namespace=mysql
