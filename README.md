@@ -106,7 +106,3 @@ kubectl exec -ti mariadb-0 -- /bin/bash
 # inside pod
 mysql --password=$MYSQL_ROOT_PASSWORD -e "GRANT ALL PRIVILEGES ON *.* TO 'root'@'%' IDENTIFIED BY '$MYSQL_ROOT_PASSWORD' WITH GRANT OPTION;
 ```
-
-### Healthz
-
-This is a TODO. The healthz folder is a copy of https://github.com/kubernetes/contrib/tree/master/pets/mysql/healthz.
