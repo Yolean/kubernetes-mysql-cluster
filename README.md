@@ -46,11 +46,10 @@ After that start bootstrapping.
 
 ### Initialize volumes and cluster
 
-Bootstrapping uses a slightly modified copy of the StatefulSet definition, with a single replica and an added argument `--wsrep-new-cluster`. So don't `kubectl create` from `./50mariadb.yml` unless you already have a cluster running. Instead:
+First get a single instance with `--wsrep-new-cluster` up and running:
 
 ```
-kubectl create -f bootstrap/50mariadb.yml
-# wait for Running state, then
+kubectl create -f ./
 kubectl logs -f mariadb-0
 ```
 
@@ -70,13 +69,10 @@ You should see something like
 Now keep that pod running, but change StatefulSet to create normal replicas.
 
 ```
-kubectl delete -f bootstrap/50mariadb.yml
-kubectl create -f 50mariadb.yml
-# wait again, then
-kubectl logs -f mariadb-1
+./70unbootstrap.sh
 ```
 
-You might get a restart, but then something like
+This scales to three nodes. You can `kubectl logs -f mariadb-1` to see something like:
 
 ```
 [Note] WSREP: Quorum results:
@@ -89,11 +85,10 @@ You might get a restart, but then something like
 	protocols  = 0/7/3 (gcs/repl/appl),
 ```
 
-Now you can delete `mariadb-0` and it'll be re-created for you
-without the `--wsrep-new-cluster` argument.
+Now you can ```kubectl delete mariadb-0``` and it'll be re-created without the `--wsrep-new-cluster` argument. Logs will confirm that the new `mariadb-0` joins the cluster.
 
-Keep at least 1 node running at all times,
-and the manual cluster setup wasn't a big deal.
+Keep at least 1 node running at all times - which is what you want anyway,
+and the manual "unbootstrap" step isn't a big deal.
 
 ### phpMyAdmin
 
@@ -115,7 +110,3 @@ mysql --password=$MYSQL_ROOT_PASSWORD -e "GRANT ALL PRIVILEGES ON *.* TO 'root'@
 ### Healthz
 
 This is a TODO. The healthz folder is a copy of https://github.com/kubernetes/contrib/tree/master/pets/mysql/healthz.
-
-### Storage
-
-Why we request only 100 Mb storage? We aim to learn to monitor our volumes and [resize](https://cloud.google.com/sdk/gcloud/reference/compute/disks/resize) on demand. For hostPath volumes the size doesn't matter, as long as PV and PVC sizes match.
