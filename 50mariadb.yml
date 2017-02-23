@@ -14,7 +14,7 @@ spec:
       terminationGracePeriodSeconds: 10
       containers:
         - name: mariadb
-          image: mariadb:10.1.20@sha256:0ce9f13b5c5d235397252570acd0286a0a03472a22b7f0384fce09e65c680d13
+          image: mariadb:10.1.21@sha256:ed04792bb13c111cbd1743c2921ea6cf777051a7f7f51f7b134efec9af7afdad
           ports:
             - containerPort: 3306
               name: mysql
