@@ -72,7 +72,7 @@ Now keep that pod running, but change StatefulSet to create normal replicas.
 ./70unbootstrap.sh
 ```
 
-This scales to three nodes. You can `kubectl logs -f mariadb-1` to see something like:
+This scales to three nodes. You can `kubectl -n mysql logs -f mariadb-1` to see something like:
 
 ```
 [Note] WSREP: Quorum results:
@@ -85,7 +85,7 @@ This scales to three nodes. You can `kubectl logs -f mariadb-1` to see something
 	protocols  = 0/7/3 (gcs/repl/appl),
 ```
 
-Now you can ```kubectl delete mariadb-0``` and it'll be re-created without the `--wsrep-new-cluster` argument. Logs will confirm that the new `mariadb-0` joins the cluster.
+Now you can ```kubectl -n mysql delete pod mariadb-0``` and it'll be re-created without the `--wsrep-new-cluster` argument. Logs will confirm that the new `mariadb-0` joins the cluster.
 
 Keep at least 1 node running at all times - which is what you want anyway,
 and the manual "unbootstrap" step isn't a big deal.
