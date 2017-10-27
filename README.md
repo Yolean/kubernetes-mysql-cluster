@@ -5,17 +5,17 @@ but with high availability because it backs our login system
 and public web.
 
 We want automatic failover, not manual, and a single configuration to maintain, not leaders and followers.
-Scaling can be manual, i.e. manifest updates and `kubectl apply`.
 
 Initially we tried Postgres, but clustering solutions like [pgpool-II]() felt a bit outdated, and [patroni](https://github.com/zalando/patroni) etc was overly complex for our needs.
 
 [Galera](http://galeracluster.com/) is a good fit for us with Kubernetes because it allows nodes to share the same configuration through `wsrep_cluster_address="gcomm://host-0,host-1`... where access to only 1 of those instances lets a new instance join the cluster.
 
 As of [MariaDB](https://mariadb.com/) [10.1](https://mariadb.com/kb/en/mariadb/what-is-mariadb-galera-cluster/) the [official docker image](https://hub.docker.com/_/mariadb/) comes with "wsrep" support. Using official images direcly mean less maintenance for us.
+We'll use an init container, instead of a custom image with modified entrypoint.
 
 Using a semi-manual bootstrap process and a container with galera support built in, we were able to simplify the setup and thus the maintenance.
 
-# What's new since our initial setup?
+## What's new since our initial setup?
 
  * https://github.com/ausov/k8s-mariadb-cluster
  * [https://github.com/kubernetes/website/blob/master/docs/tasks/run-application/run-replicated-stateful-application.md](https://kubernetes.io/docs/tasks/run-application/run-replicated-stateful-application/)
@@ -34,6 +34,41 @@ With 3 nodes we aim for the following characteristics, prioritizing consistency 
  * Consistent reads if 1 or even 2 nodes are gone.
  * Block writes if 2 nodes are gone.
  * Ideally accept writes if 1 nodes are gone.
+
+### Bootstrapping
+
+Start `mysqld` with [--wsrep-new-cluster](https://mariadb.com/kb/en/library/getting-started-with-mariadb-galera-cluster/#bootstrapping-a-new-cluster) when both of these conditions are met:
+ * It's the first replica, i.e. pod index from StatefulSet is `0`.
+ * The data volume is empty, at the time of running the init container.
+
+### Adding a node
+
+We're fine with manual `replicas` change, i.e. before `kubectl apply` we'll also edit
+[wsrep_cluster_address](https://mariadb.com/kb/en/library/getting-started-with-mariadb-galera-cluster/#adding-another-node-to-a-cluster).
+
+### Restarting the cluster
+
+If all pods have been down, we must do
+[pc.bootstrap=true](https://mariadb.com/kb/en/library/getting-started-with-mariadb-galera-cluster/#restarting-the-cluster) if the following conditions are met:
+ * It's the first replica, i.e. pod index from StatefulSet is `0`.
+ * There _is_ state in the data volume, i.e. we have a cluster [UUID](https://mariadb.com/kb/en/library/getting-started-with-mariadb-galera-cluster/#bootstrapping-a-new-cluster).
+
+And [pc.wait_prim=no](https://mariadb.com/kb/en/library/getting-started-with-mariadb-galera-cluster/#restarting-the-cluster) on the following:
+ * Not the first replica.
+ * TODO what's the difference here between first cluster start and cluster _re_start?
+
+### Readiness
+
+Maybe we should consider an instance ready only if it finds a peer.
+Could use [SQL](https://github.com/ausov/k8s-mariadb-cluster/blob/stable-10.1/example/galera.yaml#L71) but with [wsrep status](https://mariadb.com/kb/en/library/getting-started-with-mariadb-galera-cluster/#monitoring).
+
+### Liveness
+
+Haven't looked for examples yet. Just check if the instance is up and running.
+
+### Metrics
+
+For Prometheus... TODO.
 
 ## Preparations
 
