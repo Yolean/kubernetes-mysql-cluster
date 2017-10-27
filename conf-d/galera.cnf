@@ -2,9 +2,12 @@
 
 # This will be passed to all mysql clients
 [client]
+default-character-set = utf8mb4
 
 # The MySQL server
 [mysqld]
+character-set-server = utf8mb4
+collation-server = utf8mb4_unicode_ci
 
 #
 # * Galera-related settings
@@ -42,3 +45,4 @@ bind-address=0.0.0.0
 [mysqldump]
 
 [mysql]
+default-character-set = utf8mb4

@@ -39,8 +39,6 @@ spec:
             - name: MYSQL_INITDB_SKIP_TZINFO
               value: "yes"
           args:
-            - --character-set-server=utf8mb4
-            - --collation-server=utf8mb4_unicode_ci
             # Remove after first replicas=1 create
             - --wsrep-new-cluster
           volumeMounts:
