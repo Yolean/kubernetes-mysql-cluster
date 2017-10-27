@@ -14,7 +14,7 @@ spec:
       labels:
         app: mariadb
     spec:
-      terminationGracePeriodSeconds: 10
+      terminationGracePeriodSeconds: 60
       containers:
         - name: mariadb
           image: mariadb:10.2.9@sha256:a8cdb2344e69bc8e9243860aac09ef59327a106ee29dab9c45a7fbba287ca607
