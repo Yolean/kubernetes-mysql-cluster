@@ -9,6 +9,7 @@ spec:
       app: mariadb
   serviceName: "mariadb"
   replicas: 3
+  podManagementPolicy: Parallel
   template:
     metadata:
       labels:
@@ -64,6 +65,17 @@ spec:
               key: rootpw
         - name: MYSQL_INITDB_SKIP_TZINFO
           value: "yes"
+        readinessProbe:
+          exec:
+            command:
+            - /bin/bash
+            - -ec
+            - >-
+              '['
+              2 -lt
+              $(mysql -p$MYSQL_ROOT_PASSWORD -e "SHOW STATUS LIKE 'wsrep_cluster_size';" | grep wsrep_cluster_size | awk '{ print $2 }')
+              ']'
+          initialDelaySeconds: 30
         volumeMounts:
         - name: mysql
           mountPath: /var/lib/mysql
