@@ -1,9 +1,12 @@
-apiVersion: apps/v1beta1
+apiVersion: apps/v1beta2
 kind: StatefulSet
 metadata:
   name: mariadb
   namespace: mysql
 spec:
+  selector:
+    matchLabels:
+      app: mariadb
   serviceName: "mariadb"
   replicas: 1
   template:
@@ -11,7 +14,7 @@ spec:
       labels:
         app: mariadb
     spec:
-      terminationGracePeriodSeconds: 10
+      terminationGracePeriodSeconds: 60
       containers:
         - name: mariadb
           image: mariadb:10.2.9@sha256:a8cdb2344e69bc8e9243860aac09ef59327a106ee29dab9c45a7fbba287ca607
@@ -49,8 +52,8 @@ spec:
               mountPath: /docker-entrypoint-initdb.d
       volumes:
         - name: conf
-          configMap:
-            name: conf-d
+          secret:
+            secretName: conf-d
         - name: initdb
           emptyDir: {}
   volumeClaimTemplates:
@@ -58,6 +61,7 @@ spec:
       name: mysql
     spec:
       accessModes: [ "ReadWriteOnce" ]
+      storageClassName: mysql-data
       resources:
         requests:
-          storage: 10Gi
+          storage: 1Gi
