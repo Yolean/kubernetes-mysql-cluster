@@ -15,6 +15,32 @@ spec:
         app: mariadb
     spec:
       terminationGracePeriodSeconds: 60
+      initContainers:
+      - name: init-config
+        command: ['/bin/bash', '/etc/mysql/conf.d/init.sh']
+        env:
+        - name: K8S_NODE_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: spec.nodeName
+        - name: POD_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
+        - name: POD_NAMESPACE
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.namespace
+        - name: DATADIR
+          value: /var/lib/mysql
+        volumeMounts:
+        - name: mysql
+          mountPath: /var/lib/mysql
+        - name: conf
+          mountPath: /etc/mysql/conf.d
+        - name: initdb
+          mountPath: /docker-entrypoint-initdb.d
+        image: mariadb:10.2.9@sha256:a8cdb2344e69bc8e9243860aac09ef59327a106ee29dab9c45a7fbba287ca607
       containers:
         - name: mariadb
           image: mariadb:10.2.9@sha256:a8cdb2344e69bc8e9243860aac09ef59327a106ee29dab9c45a7fbba287ca607
@@ -38,9 +64,6 @@ spec:
                   key: rootpw
             - name: MYSQL_INITDB_SKIP_TZINFO
               value: "yes"
-          args:
-            # Remove after first replicas=1 create
-            - --wsrep-new-cluster
           volumeMounts:
             - name: mysql
               mountPath: /var/lib/mysql
