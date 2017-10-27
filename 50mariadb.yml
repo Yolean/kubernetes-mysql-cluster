@@ -42,41 +42,41 @@ spec:
           mountPath: /docker-entrypoint-initdb.d
         image: mariadb:10.2.9@sha256:a8cdb2344e69bc8e9243860aac09ef59327a106ee29dab9c45a7fbba287ca607
       containers:
-        - name: mariadb
-          image: mariadb:10.2.9@sha256:a8cdb2344e69bc8e9243860aac09ef59327a106ee29dab9c45a7fbba287ca607
-          ports:
-            - containerPort: 3306
-              name: mysql
-            - containerPort: 4444
-              name: sst
-            - containerPort: 4567
-              name: replication
-            - containerPort: 4567
-              protocol: UDP
-              name: replicationudp
-            - containerPort: 4568
-              name: ist
-          env:
-            - name: MYSQL_ROOT_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: mysql-secret
-                  key: rootpw
-            - name: MYSQL_INITDB_SKIP_TZINFO
-              value: "yes"
-          volumeMounts:
-            - name: mysql
-              mountPath: /var/lib/mysql
-            - name: conf
-              mountPath: /etc/mysql/conf.d
-            - name: initdb
-              mountPath: /docker-entrypoint-initdb.d
-      volumes:
+      - name: mariadb
+        image: mariadb:10.2.9@sha256:a8cdb2344e69bc8e9243860aac09ef59327a106ee29dab9c45a7fbba287ca607
+        ports:
+        - containerPort: 3306
+          name: mysql
+        - containerPort: 4444
+          name: sst
+        - containerPort: 4567
+          name: replication
+        - containerPort: 4567
+          protocol: UDP
+          name: replicationudp
+        - containerPort: 4568
+          name: ist
+        env:
+        - name: MYSQL_ROOT_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: mysql-secret
+              key: rootpw
+        - name: MYSQL_INITDB_SKIP_TZINFO
+          value: "yes"
+        volumeMounts:
+        - name: mysql
+          mountPath: /var/lib/mysql
         - name: conf
-          secret:
-            secretName: conf-d
+          mountPath: /etc/mysql/conf.d
         - name: initdb
-          emptyDir: {}
+          mountPath: /docker-entrypoint-initdb.d
+      volumes:
+      - name: conf
+        secret:
+          secretName: conf-d
+      - name: initdb
+        emptyDir: {}
   volumeClaimTemplates:
   - metadata:
       name: mysql
