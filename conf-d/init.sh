@@ -1,11 +1,6 @@
 #!/bin/bash
 set -x
 
-#2017-10-27 19:53:40 139929414469504 [Note] WSREP: 'wsrep-new-cluster' option used, bootstrapping the cluster
-#2017-10-27 19:53:40 139929414469504 [Note] WSREP: Setting initial position to 00000000-0000-0000-0000-000000000000:-1
-
-#https://mariadb.com/resources/blog/mariadb-galera-cluster-quirk-bootstrapping
-
 HOST_ID=${HOSTNAME##*-}
 
 [ -z "$DATADIR" ] && exit "Missing DATADIR variable" && exit 1
@@ -18,6 +13,9 @@ if [ ! -d "$DATADIR/mysql" ]; then
 
   if [ $HOST_ID -eq 0 ]; then
     sed -i 's|#init#wsrep_new_cluster=true#init#|wsrep_new_cluster=true|' $MYCNF
+    # ... should log:
+    #[Note] WSREP: 'wsrep-new-cluster' option used, bootstrapping the cluster
+    #[Note] WSREP: Setting initial position to 00000000-0000-0000-0000-000000000000:-1
   fi
 fi
 
