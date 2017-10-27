@@ -1,4 +1,19 @@
 #!/bin/bash
-DIR=`dirname "$BASH_SOURCE"`
+set -e
+set -x
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
-kubectl create secret generic "conf-d" --from-file="$DIR/conf-d/" --namespace=mysql
+if [ -z "${NAMESPACE}" ]; then
+    NAMESPACE=mysql
+fi
+
+kctl() {
+    kubectl --namespace "$NAMESPACE" "$@"
+}
+
+SECRET=conf-d
+
+kctl create secret generic $SECRET --from-file="$DIR/conf-d/" || \
+kctl create secret generic $SECRET --from-file="$DIR/conf-d/" \
+    --dry-run -o=yaml \
+    | kctl replace secret generic $SECRET -f -

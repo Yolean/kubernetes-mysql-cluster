@@ -18,6 +18,8 @@ collation-server = utf8mb4_unicode_ci
 # Mandatory settings
 wsrep_on=ON
 wsrep_provider="/usr/lib/galera/libgalera_smm.so"
+#init#wsrep_new_cluster=true#init#
+#init#wsrep_provider_options="pc.bootstrap=true"#init#
 wsrep_cluster_address="gcomm://mariadb-0.mariadb,mariadb-1.mariadb,mariadb-2.mariadb"
 binlog_format=ROW
 default_storage_engine=InnoDB
