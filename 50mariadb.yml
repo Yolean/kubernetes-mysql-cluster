@@ -9,7 +9,7 @@ spec:
       app: mariadb
   serviceName: "mariadb"
   replicas: 3
-  podManagementPolicy: Parallel
+  podManagementPolicy: OrderedReady
   template:
     metadata:
       labels:
