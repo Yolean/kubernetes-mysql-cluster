@@ -12,11 +12,13 @@ Initially we tried Postgres, but clustering solutions like [pgpool-II]() felt a 
 
 As of [MariaDB](https://mariadb.com/) [10.1](https://mariadb.com/kb/en/mariadb/what-is-mariadb-galera-cluster/) the [official docker image](https://hub.docker.com/_/mariadb/) comes with "wsrep" support. Using official images direcly mean less maintenance for us.
 
-Kubernetes [recently added](http://blog.kubernetes.io/2016/07/kubernetes-1.3-bridging-cloud-native-and-enterprise-workloads.html) support for "stateful applications", the [StatefulSet](http://kubernetes.io/docs/user-guide/StatefulSet/). There's a [semi-official](https://github.com/kubernetes/contrib/tree/master/pets/mysql) example using MySQL.
-It's more an example of what you can do with StatefulSet than a production setup.
-It uses the init container concept, which looks heavily alpha, to try to automate installation.
-
 Using a semi-manual bootstrap process and a container with galera support built in, we were able to simplify the setup and thus the maintenance.
+
+# What's new since our initial setup?
+
+ * https://github.com/ausov/k8s-mariadb-cluster
+ * [https://github.com/kubernetes/website/blob/master/docs/tasks/run-application/run-replicated-stateful-application.md](https://kubernetes.io/docs/tasks/run-application/run-replicated-stateful-application/)
+ * https://github.com/openstack/kolla-kubernetes/blob/master/helm/service/mariadb/requirements.yaml
 
 ## Tradeoffs
 
