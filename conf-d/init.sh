@@ -7,6 +7,10 @@ HOST_ID=${HOSTNAME##*-}
 
 MYCNF=/etc/mysql/conf.d/galera.cnf
 
+if [ ! -z "$MYSQL_ROOT_PASSWORD" ]; then
+  sed -i "s|#init#password=#init#|password=$MYSQL_ROOT_PASSWORD|" $MYCNF
+fi
+
 # https://github.com/docker-library/mariadb/commit/f76084f0f9dc13f29cce48c727440eb79b4e92fa#diff-b0fa4b30392406b32de6b8ffe36e290dR80
 if [ ! -d "$DATADIR/mysql" ]; then
   echo "No database in $DATADIR; configuring $POD_NAME for initial start"
