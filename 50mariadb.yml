@@ -97,4 +97,4 @@ spec:
       storageClassName: mysql-data
       resources:
         requests:
-          storage: 1Gi
+          storage: 2Gi
