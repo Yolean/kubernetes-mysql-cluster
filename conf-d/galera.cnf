@@ -1,16 +1,3 @@
-[client-server]
-
-# This will be passed to all mysql clients
-[client]
-default-character-set = utf8mb4
-user=root
-#init#password=#init#
-
-# The MySQL server
-[mysqld]
-character-set-server = utf8mb4
-collation-server = utf8mb4_unicode_ci
-
 #
 # * Galera-related settings
 #
@@ -36,17 +23,3 @@ bind-address=0.0.0.0
 # Optional setting
 #wsrep_slave_threads=1
 #innodb_flush_log_at_trx_commit=0
-
-# This group is only read by MariaDB servers, not by MySQL.
-# If you use the same .cnf file for MySQL and MariaDB,
-# you can put MariaDB-only options here
-[mariadb]
-
-[mariadb-10.1]
-
-[mariadb-10.2]
-
-[mysqldump]
-
-[mysql]
-default-character-set = utf8mb4

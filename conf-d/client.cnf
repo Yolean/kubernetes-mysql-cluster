@@ -1,0 +1,5 @@
+[client-server]
+
+[client]
+user=root
+#init#password=#init#
