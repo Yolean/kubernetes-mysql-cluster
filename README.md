@@ -5,6 +5,7 @@ but with high availability because it backs our login system
 and public web.
 
 We want automatic failover, not manual, and a single configuration to maintain, not leaders and followers.
+Scaling can be manual, i.e. manifest updates and `kubectl apply`.
 
 Initially we tried Postgres, but clustering solutions like [pgpool-II]() felt a bit outdated, and [patroni](https://github.com/zalando/patroni) etc was overly complex for our needs.
 
@@ -19,6 +20,7 @@ Using a semi-manual bootstrap process and a container with galera support built 
  * https://github.com/ausov/k8s-mariadb-cluster
  * [https://github.com/kubernetes/website/blob/master/docs/tasks/run-application/run-replicated-stateful-application.md](https://kubernetes.io/docs/tasks/run-application/run-replicated-stateful-application/)
  * https://github.com/openstack/kolla-kubernetes/blob/master/helm/service/mariadb/requirements.yaml
+ * https://github.com/kubernetes/contrib/tree/master/peer-finder
 
 ## Tradeoffs
 
