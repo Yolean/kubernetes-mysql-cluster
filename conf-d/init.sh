@@ -21,7 +21,7 @@ if [ ! -d "$DATADIR/mysql" ]; then
   fi
 fi
 
-
+set +x
 
 WAIT=/tmp/wait
 touch $WAIT
