@@ -1,5 +1,7 @@
 [client-server]
 
 [client]
+
+[mysql]
 user=root
 #init#password=#init#
