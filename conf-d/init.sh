@@ -20,12 +20,3 @@ if [ ! -d "$DATADIR/mysql" ]; then
     #[Note] WSREP: Setting initial position to 00000000-0000-0000-0000-000000000000:-1
   fi
 fi
-
-set +x
-
-WAIT=/tmp/wait
-touch $WAIT
-echo "To let mysql start: kubectl -n $POD_NAMESPACE exec -c init-config $POD_NAME -- rm $WAIT"
-while [ -f $WAIT ]; do
-  sleep 1
-done
