@@ -76,10 +76,10 @@ spec:
             - /bin/bash
             - -ec
             - >-
-              '['
-              -f
-              /tmp/ready
-              ']'
+              mysql
+              -uroot
+              -p$MYSQL_ROOT_PASSWORD
+              -e "SHOW STATUS LIKE 'wsrep%';"
           initialDelaySeconds: 30
         volumeMounts:
         - name: mysql
