@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 set -x
 
 HOST_ID=${HOSTNAME##*-}
@@ -15,9 +15,7 @@ if [ ! -d "$DATADIR/mysql" ]; then
     #[Note] WSREP: 'wsrep-new-cluster' option used, bootstrapping the cluster
     #[Note] WSREP: Setting initial position to 00000000-0000-0000-0000-000000000000:-1
   fi
-else
-  if [ ! -z "$MYSQL_ROOT_PASSWORD" ]; then
-    sed -i "s|#init#user=#init#|user=root|" /etc/mysql/conf.d/client.cnf
-    sed -i "s|#init#password=#init#|password=$MYSQL_ROOT_PASSWORD|" /etc/mysql/conf.d/client.cnf
-  fi
 fi
+
+# https://github.com/docker-library/mariadb/blob/master/10.2/docker-entrypoint.sh#L62
+mysqld --verbose --help --log-bin-index="$(mktemp -u)"
