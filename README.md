@@ -83,67 +83,26 @@ Then:
 
 After that start bootstrapping.
 
-### Initialize volumes and cluster
+### Cluster health
 
-First get a single instance with `--wsrep-new-cluster` up and running:
-
+Readiness and liveness probes will only assert client-level health of individual pods.
+Watch logs for "sst" or "Quorum results", or run this quick check:
 ```
-kubectl create -f ./
-kubectl logs -f mariadb-0
+for i in 0 1 2; do kubectl -n mysql exec mariadb-$i -- mysql -e "SHOW STATUS LIKE 'wsrep_cluster_size';" -N; done
 ```
-
-You should see something like
-
-```
-...[Note] WSREP: Quorum results:
-  version    = 3,
-  component  = PRIMARY,
-  conf_id    = 0,
-  members    = 1/1 (joined/total),
-  act_id     = 4,
-  last_appl. = -1,
-  protocols  = 0/7/3 (gcs/repl/appl),
-```
-
-Now keep that pod running, but change StatefulSet to create normal replicas.
-
-```
-./70unbootstrap.sh
-```
-
-This scales to three nodes. You can `kubectl -n mysql logs -f mariadb-1` to see something like:
-
-```
-[Note] WSREP: Quorum results:
-	version    = 3,
-	component  = PRIMARY,
-	conf_id    = 4,
-	members    = 2/3 (joined/total),
-	act_id     = 4,
-	last_appl. = 0,
-	protocols  = 0/7/3 (gcs/repl/appl),
-```
-
-Now you can ```kubectl -n mysql delete pod mariadb-0``` and it'll be re-created without the `--wsrep-new-cluster` argument. Logs will confirm that the new `mariadb-0` joins the cluster.
-
-Keep at least 1 node running at all times - which is what you want anyway,
-and the manual "unbootstrap" step isn't a big deal.
 
 ### phpMyAdmin
 
 Carefully consider the security implications before you create this. Note that it uses a non-official image.
 
 ```
-kubectl create -f myadmin/
+kubectl apply -f myadmin/
 ```
 
-PhpMyAdmin has a login page where you need a mysql user. The default for root is localhost-only access (the merits of this in a micorservices context can be discussed). To allow root login from phpMyAdmin:
+PhpMyAdmin has a login page where you need a mysql user. To allow login (with full access) create a user with your choice of password:
 
 ```
-# enter pod
-kubectl exec -ti mariadb-0 -- /bin/bash
-# inside pod
-mysql --password=$MYSQL_ROOT_PASSWORD -e "GRANT ALL PRIVILEGES ON *.* TO 'root'@'%' IDENTIFIED BY '$MYSQL_ROOT_PASSWORD' WITH GRANT OPTION;
+kubectl -n mysql exec mariadb-0 -- mysql -e "CREATE USER 'phpmyadmin'@'%' IDENTIFIED BY 'my-admin-pw'; GRANT ALL ON *.* TO 'phpmyadmin'@'%';"
 ```
 
 ## Recover

@@ -18,7 +18,7 @@ spec:
       terminationGracePeriodSeconds: 10
       initContainers:
       - name: init-config
-        command: ['/bin/bash', '/etc/mysql/conf.d/init.sh']
+        command: ['/bin/sh', '/etc/mysql/conf.d/init.sh']
         env:
         - name: K8S_NODE_NAME
           valueFrom:
@@ -32,11 +32,6 @@ spec:
           valueFrom:
             fieldRef:
               fieldPath: metadata.namespace
-        - name: MYSQL_ROOT_PASSWORD
-          valueFrom:
-            secretKeyRef:
-              name: mysql-secret
-              key: rootpw
         - name: DATADIR
           value: /var/lib/mysql
         volumeMounts:
@@ -63,25 +58,25 @@ spec:
         - containerPort: 4568
           name: ist
         env:
-        - name: MYSQL_ROOT_PASSWORD
-          valueFrom:
-            secretKeyRef:
-              name: mysql-secret
-              key: rootpw
+        - name: MYSQL_ROOT_HOST
+          value: "localhost"
+        - name: MYSQL_ALLOW_EMPTY_PASSWORD
+          value: "yes"
         - name: MYSQL_INITDB_SKIP_TZINFO
           value: "yes"
         readinessProbe:
           exec:
             command:
             - mysql
-            -  -e
-            - "SHOW STATUS LIKE 'wsrep%';"
+            - -e
+            - "SHOW STATUS LIKE 'wsrep_ready';"
+            - -N
           initialDelaySeconds: 30
         livenessProbe:
           exec:
             command:
             - mysql
-            -  -e
+            - -e
             - "SHOW DATABASES;"
           # might need to be tweaked for large initial state transfers
           initialDelaySeconds: 60
@@ -94,8 +89,8 @@ spec:
           mountPath: /docker-entrypoint-initdb.d
       volumes:
       - name: conf
-        secret:
-          secretName: conf-d
+        configMap:
+          name: conf-d
       - name: initdb
         emptyDir: {}
   volumeClaimTemplates:
