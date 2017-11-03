@@ -3,5 +3,5 @@
 [client]
 
 [mysql]
-#client#user=root
-#client##init#password=#init#
+user=root
+#init#password=#init#
