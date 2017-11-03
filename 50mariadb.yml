@@ -67,12 +67,12 @@ spec:
         readinessProbe:
           exec:
             command:
-            - /bin/bash
+            - /bin/sh
             - -ec
             - >-
               '['
-              ON ==
-              $(mysql -e "SHOW STATUS LIKE 'wsrep_ready';" -N | awk '{ print $2 }')
+              ON =
+              $(mysql -e "SHOW STATUS LIKE 'wsrep_ready';" -N -B | sed 's/.*ON/ON/')
               ']'
           initialDelaySeconds: 30
         livenessProbe:
