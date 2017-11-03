@@ -9,16 +9,16 @@ spec:
       app: mariadb
   serviceName: "mariadb"
   replicas: 3
-  podManagementPolicy: Parallel
+  podManagementPolicy: OrderedReady
   template:
     metadata:
       labels:
         app: mariadb
     spec:
-      terminationGracePeriodSeconds: 60
+      terminationGracePeriodSeconds: 30
       initContainers:
       - name: init-config
-        command: ['/bin/bash', '/etc/mysql/conf.d/init.sh']
+        command: ['/bin/sh', '/etc/mysql/conf.d/init.sh']
         env:
         - name: K8S_NODE_NAME
           valueFrom:
@@ -58,24 +58,31 @@ spec:
         - containerPort: 4568
           name: ist
         env:
-        - name: MYSQL_ROOT_PASSWORD
-          valueFrom:
-            secretKeyRef:
-              name: mysql-secret
-              key: rootpw
+        - name: MYSQL_ROOT_HOST
+          value: "localhost"
+        - name: MYSQL_ALLOW_EMPTY_PASSWORD
+          value: "yes"
         - name: MYSQL_INITDB_SKIP_TZINFO
           value: "yes"
         readinessProbe:
           exec:
             command:
-            - /bin/bash
+            - /bin/sh
             - -ec
             - >-
               '['
-              2 -lt
-              $(mysql -p$MYSQL_ROOT_PASSWORD -e "SHOW STATUS LIKE 'wsrep_cluster_size';" | grep wsrep_cluster_size | awk '{ print $2 }')
+              ON =
+              $(mysql -e "SHOW STATUS LIKE 'wsrep_ready';" -N -B | sed 's/.*ON/ON/')
               ']'
           initialDelaySeconds: 30
+        livenessProbe:
+          exec:
+            command:
+            - mysql
+            - -e
+            - "SHOW DATABASES;"
+          # might need to be tweaked for large initial state transfers
+          initialDelaySeconds: 60
         volumeMounts:
         - name: mysql
           mountPath: /var/lib/mysql
@@ -85,8 +92,8 @@ spec:
           mountPath: /docker-entrypoint-initdb.d
       volumes:
       - name: conf
-        secret:
-          secretName: conf-d
+        configMap:
+          name: conf-d
       - name: initdb
         emptyDir: {}
   volumeClaimTemplates:
@@ -97,4 +104,4 @@ spec:
       storageClassName: mysql-data
       resources:
         requests:
-          storage: 1Gi
+          storage: 2Gi
