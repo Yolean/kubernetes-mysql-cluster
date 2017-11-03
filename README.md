@@ -96,16 +96,13 @@ for i in 0 1 2; do kubectl -n mysql exec mariadb-$i -- mysql -e "SHOW STATUS LIK
 Carefully consider the security implications before you create this. Note that it uses a non-official image.
 
 ```
-kubectl create -f myadmin/
+kubectl apply -f myadmin/
 ```
 
-PhpMyAdmin has a login page where you need a mysql user. The default for root is localhost-only access (the merits of this in a micorservices context can be discussed). To allow root login from phpMyAdmin:
+PhpMyAdmin has a login page where you need a mysql user. To allow login (with full access) create a user with your choice of password:
 
 ```
-# enter pod
-kubectl exec -ti mariadb-0 -- /bin/bash
-# inside pod
-mysql --password=$MYSQL_ROOT_PASSWORD -e "GRANT ALL PRIVILEGES ON *.* TO 'root'@'%' IDENTIFIED BY '$MYSQL_ROOT_PASSWORD' WITH GRANT OPTION;
+kubectl -n mysql exec mariadb-0 -- mysql -e "CREATE USER 'phpmyadmin'@'%' IDENTIFIED BY 'my-admin-pw'; GRANT ALL ON *.* TO 'phpmyadmin'@'%';"
 ```
 
 ## Recover
