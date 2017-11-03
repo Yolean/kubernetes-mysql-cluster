@@ -67,10 +67,13 @@ spec:
         readinessProbe:
           exec:
             command:
-            - mysql
-            - -e
-            - "SHOW STATUS LIKE 'wsrep_ready';"
-            - -N
+            - /bin/bash
+            - -ec
+            - >-
+              '['
+              ON ==
+              $(mysql -e "SHOW STATUS LIKE 'wsrep_ready';" -N | awk '{ print $2 }')
+              ']'
           initialDelaySeconds: 30
         livenessProbe:
           exec:
