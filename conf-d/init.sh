@@ -17,6 +17,7 @@ if [ ! -d "$DATADIR/mysql" ]; then
   fi
 else
   if [ ! -z "$MYSQL_ROOT_PASSWORD" ]; then
+    sed -i "s|#init#user=#init#|user=root|" /etc/mysql/conf.d/client.cnf
     sed -i "s|#init#password=#init#|password=$MYSQL_ROOT_PASSWORD|" /etc/mysql/conf.d/client.cnf
   fi
 fi
