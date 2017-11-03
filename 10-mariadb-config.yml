@@ -1,0 +1,79 @@
+kind: ConfigMap
+metadata:
+  name: conf-d
+  namespace: mysql
+apiVersion: v1
+data:
+  galera.cnf: |
+    #
+    # * Galera-related settings
+    #
+    # https://mariadb.com/kb/en/mariadb/galera-cluster-system-variables/
+    #
+    [galera]
+    # Mandatory settings
+    wsrep_on=ON
+    wsrep_provider="/usr/lib/galera/libgalera_smm.so"
+    #init#wsrep_new_cluster=true#init#
+    #init#wsrep_provider_options="pc.bootstrap=true"#init#
+    wsrep_cluster_address="gcomm://mariadb-0.mariadb,mariadb-1.mariadb,mariadb-2.mariadb"
+    binlog_format=ROW
+    default_storage_engine=InnoDB
+    innodb_autoinc_lock_mode=2
+    wsrep-sst-method=rsync
+
+    #
+    # Allow server to accept connections on all interfaces.
+    #
+    bind-address=0.0.0.0
+    #
+    # Optional setting
+    #wsrep_slave_threads=1
+    #innodb_flush_log_at_trx_commit=0
+  utf8.cnf: |
+    [client-server]
+
+    # This will be passed to all mysql clients
+    [client]
+    default-character-set = utf8mb4
+
+    # The MySQL server
+    [mysqld]
+    character-set-server = utf8mb4
+    collation-server = utf8mb4_unicode_ci
+
+    [mysql]
+    default-character-set = utf8mb4
+
+    [mysqldump]
+
+    # This group is only read by MariaDB servers, not by MySQL.
+    # If you use the same .cnf file for MySQL and MariaDB,
+    # you can put MariaDB-only options here
+    [mariadb]
+
+    [mariadb-10.1]
+
+    [mariadb-10.2]
+  init.sh: |
+    #!/bin/sh
+    set -x
+
+    HOST_ID=${HOSTNAME##*-}
+
+    [ -z "$DATADIR" ] && exit "Missing DATADIR variable" && exit 1
+
+    # https://github.com/docker-library/mariadb/commit/f76084f0f9dc13f29cce48c727440eb79b4e92fa#diff-b0fa4b30392406b32de6b8ffe36e290dR80
+    if [ ! -d "$DATADIR/mysql" ]; then
+      echo "No database in $DATADIR; configuring $POD_NAME for initial start"
+
+      if [ $HOST_ID -eq 0 ]; then
+        sed -i 's|#init#wsrep_new_cluster=true#init#|wsrep_new_cluster=true|' /etc/mysql/conf.d/galera.cnf
+        # ... should log:
+        #[Note] WSREP: 'wsrep-new-cluster' option used, bootstrapping the cluster
+        #[Note] WSREP: Setting initial position to 00000000-0000-0000-0000-000000000000:-1
+      fi
+    fi
+
+    # https://github.com/docker-library/mariadb/blob/master/10.2/docker-entrypoint.sh#L62
+    mysqld --verbose --help --log-bin-index="$(mktemp -u)"
