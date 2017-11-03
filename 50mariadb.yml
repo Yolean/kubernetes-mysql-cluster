@@ -33,10 +33,10 @@ spec:
             fieldRef:
               fieldPath: metadata.namespace
         - name: DATADIR
-          value: /var/lib/mysql
+          value: /data/db
         volumeMounts:
         - name: mysql
-          mountPath: /var/lib/mysql
+          mountPath: /data
         - name: conf
           mountPath: /etc/mysql/conf.d
         - name: initdb
@@ -85,7 +85,7 @@ spec:
           initialDelaySeconds: 60
         volumeMounts:
         - name: mysql
-          mountPath: /var/lib/mysql
+          mountPath: /data
         - name: conf
           mountPath: /etc/mysql/conf.d
         - name: initdb

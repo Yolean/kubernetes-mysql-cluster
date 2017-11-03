@@ -4,6 +4,9 @@ metadata:
   namespace: mysql
 apiVersion: v1
 data:
+  datadir.cnf: |
+    [mysqld]
+    datadir=/data/db
   galera.cnf: |
     #
     # * Galera-related settings
