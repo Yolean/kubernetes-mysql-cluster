@@ -14,6 +14,9 @@ spec:
     metadata:
       labels:
         app: mariadb
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "9104"
     spec:
       terminationGracePeriodSeconds: 30
       initContainers:
