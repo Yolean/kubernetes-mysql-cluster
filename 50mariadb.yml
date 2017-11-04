@@ -14,6 +14,9 @@ spec:
     metadata:
       labels:
         app: mariadb
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "9104"
     spec:
       terminationGracePeriodSeconds: 30
       initContainers:
@@ -33,10 +36,10 @@ spec:
             fieldRef:
               fieldPath: metadata.namespace
         - name: DATADIR
-          value: /var/lib/mysql
+          value: /data/db
         volumeMounts:
         - name: mysql
-          mountPath: /var/lib/mysql
+          mountPath: /data
         - name: conf
           mountPath: /etc/mysql/conf.d
         - name: initdb
@@ -85,11 +88,18 @@ spec:
           initialDelaySeconds: 60
         volumeMounts:
         - name: mysql
-          mountPath: /var/lib/mysql
+          mountPath: /data
         - name: conf
           mountPath: /etc/mysql/conf.d
         - name: initdb
           mountPath: /docker-entrypoint-initdb.d
+      - name: metrics
+        image: prom/mysqld-exporter@sha256:a1eda24a95f09a817f2cf39a7fa3d506df88e76ebdc08c0293744ebaa546e3ab
+        env:
+        - name: DATA_SOURCE_NAME
+          value: root@(localhost:3306)/
+        ports:
+        - containerPort: 9104
       volumes:
       - name: conf
         configMap:
