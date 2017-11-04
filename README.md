@@ -83,12 +83,19 @@ Then:
 
 After that start bootstrapping.
 
-### Cluster health
+### Cluster Health
 
 Readiness and liveness probes will only assert client-level health of individual pods.
 Watch logs for "sst" or "Quorum results", or run this quick check:
 ```
 for i in 0 1 2; do kubectl -n mysql exec mariadb-$i -- mysql -e "SHOW STATUS LIKE 'wsrep_cluster_size';" -N; done
+```
+
+The value is also a metric in the [Prometheus](https://prometheus.io) endpoint:
+```
+# with kubectl -n mysql port-forward mariadb-0 9104:9104
+$ curl -s http://localhost:9104/metrics | grep ^mysql_global_status_wsrep_cluster_size
+mysql_global_status_wsrep_cluster_size 3
 ```
 
 ### phpMyAdmin

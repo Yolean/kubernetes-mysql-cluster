@@ -90,6 +90,11 @@ spec:
           mountPath: /etc/mysql/conf.d
         - name: initdb
           mountPath: /docker-entrypoint-initdb.d
+      - name: metrics
+        image: prom/mysqld-exporter@sha256:a1eda24a95f09a817f2cf39a7fa3d506df88e76ebdc08c0293744ebaa546e3ab
+        env:
+        - name: DATA_SOURCE_NAME
+          value: root@(localhost:3306)/
       volumes:
       - name: conf
         configMap:
