@@ -1,63 +1,117 @@
-apiVersion: apps/v1beta1
+apiVersion: apps/v1beta2
 kind: StatefulSet
 metadata:
   name: mariadb
   namespace: mysql
 spec:
+  selector:
+    matchLabels:
+      app: mariadb
   serviceName: "mariadb"
-  replicas: 1
+  replicas: 3
+  podManagementPolicy: OrderedReady
   template:
     metadata:
       labels:
         app: mariadb
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "9104"
     spec:
-      terminationGracePeriodSeconds: 10
-      containers:
-        - name: mariadb
-          image: mariadb:10.1.22@sha256:21afb9ab191aac8ced2e1490ad5ec6c0f1c5704810d73451dd124670bcacfb14
-          ports:
-            - containerPort: 3306
-              name: mysql
-            - containerPort: 4444
-              name: sst
-            - containerPort: 4567
-              name: replication
-            - containerPort: 4567
-              protocol: UDP
-              name: replicationudp
-            - containerPort: 4568
-              name: ist
-          env:
-            - name: MYSQL_ROOT_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: mysql-secret
-                  key: rootpw
-            - name: MYSQL_INITDB_SKIP_TZINFO
-              value: "yes"
-          args:
-            - --character-set-server=utf8mb4
-            - --collation-server=utf8mb4_unicode_ci
-            # Remove after first replicas=1 create
-            - --wsrep-new-cluster
-          volumeMounts:
-            - name: mysql
-              mountPath: /var/lib/mysql
-            - name: conf
-              mountPath: /etc/mysql/conf.d
-            - name: initdb
-              mountPath: /docker-entrypoint-initdb.d
-      volumes:
+      terminationGracePeriodSeconds: 30
+      initContainers:
+      - name: init-config
+        command: ['/bin/sh', '/etc/mysql/conf.d/init.sh']
+        env:
+        - name: K8S_NODE_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: spec.nodeName
+        - name: POD_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
+        - name: POD_NAMESPACE
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.namespace
+        - name: DATADIR
+          value: /data/db
+        volumeMounts:
+        - name: mysql
+          mountPath: /data
         - name: conf
-          configMap:
-            name: conf-d
+          mountPath: /etc/mysql/conf.d
         - name: initdb
-          emptyDir: {}
+          mountPath: /docker-entrypoint-initdb.d
+        image: mariadb:10.2.10@sha256:e5d38bf55611af632fad0674b2b0219dae5797845da322df78aabdfbf71ec45a
+      containers:
+      - name: mariadb
+        image: mariadb:10.2.10@sha256:e5d38bf55611af632fad0674b2b0219dae5797845da322df78aabdfbf71ec45a
+        ports:
+        - containerPort: 3306
+          name: mysql
+        - containerPort: 4444
+          name: sst
+        - containerPort: 4567
+          name: replication
+        - containerPort: 4567
+          protocol: UDP
+          name: replicationudp
+        - containerPort: 4568
+          name: ist
+        env:
+        - name: MYSQL_ROOT_HOST
+          value: "localhost"
+        - name: MYSQL_ALLOW_EMPTY_PASSWORD
+          value: "yes"
+        - name: MYSQL_INITDB_SKIP_TZINFO
+          value: "yes"
+        readinessProbe:
+          exec:
+            command:
+            - /bin/sh
+            - -ec
+            - >-
+              '['
+              ON =
+              $(mysql -e "SHOW STATUS LIKE 'wsrep_ready';" -N -B | sed 's/.*ON/ON/')
+              ']'
+          initialDelaySeconds: 30
+        livenessProbe:
+          exec:
+            command:
+            - mysql
+            - -e
+            - "SHOW DATABASES;"
+          # might need to be tweaked for large initial state transfers
+          initialDelaySeconds: 60
+        volumeMounts:
+        - name: mysql
+          mountPath: /data
+        - name: conf
+          mountPath: /etc/mysql/conf.d
+        - name: initdb
+          mountPath: /docker-entrypoint-initdb.d
+      - name: metrics
+        image: prom/mysqld-exporter@sha256:a1eda24a95f09a817f2cf39a7fa3d506df88e76ebdc08c0293744ebaa546e3ab
+        env:
+        - name: DATA_SOURCE_NAME
+          value: root@(localhost:3306)/
+        ports:
+        - containerPort: 9104
+      volumes:
+      - name: conf
+        configMap:
+          name: conf-d
+      - name: initdb
+        emptyDir: {}
   volumeClaimTemplates:
   - metadata:
       name: mysql
     spec:
       accessModes: [ "ReadWriteOnce" ]
+      storageClassName: mysql-data
       resources:
         requests:
-          storage: 10Gi
+          storage: 2Gi

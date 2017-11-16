@@ -11,12 +11,16 @@ Initially we tried Postgres, but clustering solutions like [pgpool-II]() felt a 
 [Galera](http://galeracluster.com/) is a good fit for us with Kubernetes because it allows nodes to share the same configuration through `wsrep_cluster_address="gcomm://host-0,host-1`... where access to only 1 of those instances lets a new instance join the cluster.
 
 As of [MariaDB](https://mariadb.com/) [10.1](https://mariadb.com/kb/en/mariadb/what-is-mariadb-galera-cluster/) the [official docker image](https://hub.docker.com/_/mariadb/) comes with "wsrep" support. Using official images direcly mean less maintenance for us.
-
-Kubernetes [recently added](http://blog.kubernetes.io/2016/07/kubernetes-1.3-bridging-cloud-native-and-enterprise-workloads.html) support for "stateful applications", the [StatefulSet](http://kubernetes.io/docs/user-guide/StatefulSet/). There's a [semi-official](https://github.com/kubernetes/contrib/tree/master/pets/mysql) example using MySQL.
-It's more an example of what you can do with StatefulSet than a production setup.
-It uses the init container concept, which looks heavily alpha, to try to automate installation.
+We'll use an init container, instead of a custom image with modified entrypoint.
 
 Using a semi-manual bootstrap process and a container with galera support built in, we were able to simplify the setup and thus the maintenance.
+
+## What's new since our initial setup?
+
+ * https://github.com/ausov/k8s-mariadb-cluster
+ * [https://github.com/kubernetes/website/blob/master/docs/tasks/run-application/run-replicated-stateful-application.md](https://kubernetes.io/docs/tasks/run-application/run-replicated-stateful-application/)
+ * https://github.com/openstack/kolla-kubernetes/blob/master/helm/service/mariadb/requirements.yaml
+ * https://github.com/kubernetes/contrib/tree/master/peer-finder
 
 ## Tradeoffs
 
@@ -31,6 +35,41 @@ With 3 nodes we aim for the following characteristics, prioritizing consistency 
  * Block writes if 2 nodes are gone.
  * Ideally accept writes if 1 nodes are gone.
 
+### Bootstrapping
+
+Start `mysqld` with [--wsrep-new-cluster](https://mariadb.com/kb/en/library/getting-started-with-mariadb-galera-cluster/#bootstrapping-a-new-cluster) when both of these conditions are met:
+ * It's the first replica, i.e. pod index from StatefulSet is `0`.
+ * The data volume is empty, at the time of running the init container.
+
+### Adding a node
+
+We're fine with manual `replicas` change, i.e. before `kubectl apply` we'll also edit
+[wsrep_cluster_address](https://mariadb.com/kb/en/library/getting-started-with-mariadb-galera-cluster/#adding-another-node-to-a-cluster).
+
+### Restarting the cluster
+
+If all pods have been down, we must do
+[pc.bootstrap=true](https://mariadb.com/kb/en/library/getting-started-with-mariadb-galera-cluster/#restarting-the-cluster) if the following conditions are met:
+ * It's the first replica, i.e. pod index from StatefulSet is `0`.
+ * There _is_ state in the data volume, i.e. we have a cluster [UUID](https://mariadb.com/kb/en/library/getting-started-with-mariadb-galera-cluster/#bootstrapping-a-new-cluster).
+
+And [pc.wait_prim=no](https://mariadb.com/kb/en/library/getting-started-with-mariadb-galera-cluster/#restarting-the-cluster) on the following:
+ * Not the first replica.
+ * TODO what's the difference here between first cluster start and cluster _re_start?
+
+### Readiness
+
+Maybe we should consider an instance ready only if it finds a peer.
+Could use [SQL](https://github.com/ausov/k8s-mariadb-cluster/blob/stable-10.1/example/galera.yaml#L71) but with [wsrep status](https://mariadb.com/kb/en/library/getting-started-with-mariadb-galera-cluster/#monitoring).
+
+### Liveness
+
+Haven't looked for examples yet. Just check if the instance is up and running.
+
+### Metrics
+
+For Prometheus... TODO.
+
 ## Preparations
 
 Unless your Kubernetes setup has volume provisioning for StatefulSet (GKE has) you need to make sure the [Persistent Volumes](http://kubernetes.io/docs/user-guide/persistent-volumes/) exist first.
@@ -44,65 +83,70 @@ Then:
 
 After that start bootstrapping.
 
-### Initialize volumes and cluster
+### Cluster Health
 
-First get a single instance with `--wsrep-new-cluster` up and running:
-
+Readiness and liveness probes will only assert client-level health of individual pods.
+Watch logs for "sst" or "Quorum results", or run this quick check:
 ```
-kubectl create -f ./
-kubectl logs -f mariadb-0
-```
-
-You should see something like
-
-```
-...[Note] WSREP: Quorum results:
-  version    = 3,
-  component  = PRIMARY,
-  conf_id    = 0,
-  members    = 1/1 (joined/total),
-  act_id     = 4,
-  last_appl. = -1,
-  protocols  = 0/7/3 (gcs/repl/appl),
+for i in 0 1 2; do kubectl -n mysql exec mariadb-$i -- mysql -e "SHOW STATUS LIKE 'wsrep_cluster_size';" -N; done
 ```
 
-Now keep that pod running, but change StatefulSet to create normal replicas.
-
+The value is also a metric in the [Prometheus](https://prometheus.io) endpoint:
 ```
-./70unbootstrap.sh
+# with kubectl -n mysql port-forward mariadb-0 9104:9104
+$ curl -s http://localhost:9104/metrics | grep ^mysql_global_status_wsrep_cluster_size
+mysql_global_status_wsrep_cluster_size 3
 ```
-
-This scales to three nodes. You can `kubectl -n mysql logs -f mariadb-1` to see something like:
-
-```
-[Note] WSREP: Quorum results:
-	version    = 3,
-	component  = PRIMARY,
-	conf_id    = 4,
-	members    = 2/3 (joined/total),
-	act_id     = 4,
-	last_appl. = 0,
-	protocols  = 0/7/3 (gcs/repl/appl),
-```
-
-Now you can ```kubectl -n mysql delete pod mariadb-0``` and it'll be re-created without the `--wsrep-new-cluster` argument. Logs will confirm that the new `mariadb-0` joins the cluster.
-
-Keep at least 1 node running at all times - which is what you want anyway,
-and the manual "unbootstrap" step isn't a big deal.
 
 ### phpMyAdmin
 
 Carefully consider the security implications before you create this. Note that it uses a non-official image.
 
 ```
-kubectl create -f myadmin/
+kubectl apply -f myadmin/
 ```
 
-PhpMyAdmin has a login page where you need a mysql user. The default for root is localhost-only access (the merits of this in a micorservices context can be discussed). To allow root login from phpMyAdmin:
+PhpMyAdmin has a login page where you need a mysql user. To allow login (with full access) create a user with your choice of password:
 
 ```
-# enter pod
-kubectl exec -ti mariadb-0 -- /bin/bash
-# inside pod
-mysql --password=$MYSQL_ROOT_PASSWORD -e "GRANT ALL PRIVILEGES ON *.* TO 'root'@'%' IDENTIFIED BY '$MYSQL_ROOT_PASSWORD' WITH GRANT OPTION;
+kubectl -n mysql exec mariadb-0 -- mysql -e "CREATE USER 'phpmyadmin'@'%' IDENTIFIED BY 'my-admin-pw'; GRANT ALL ON *.* TO 'phpmyadmin'@'%';"
 ```
+
+## Recover
+
+It's in scope for this repo to support scaling down to 0 pods, then scale upp again (for example at maintenance or major upgrades). It's outside the scope of this repo to recover from crashes.
+
+In the unlikely event that all pods crash, the statefulset tries to restart the pods but can fail with an infinite loop.
+
+In order to restart the cluster, the "Safe-To-Bootstrap" flag must be set. Please follow the instructions found [here](http://galeracluster.com/2016/11/introducing-the-safe-to-bootstrap-feature-in-galera-cluster/)
+
+Note that their use of the word _Node_ refers to a Pod and its volume in the Kubernetes world. So to change the `safe_to_bootstrap` flag, start a new pod with the correct volume attached.
+
+### Summary (If link becomes broken)
+
+Recreate 50mariadb.yml with `--wsrep-recover` command arg flag set
+
+Get the log using `kubectl -n mysql logs -f mariadb-0` and look for the following output.
+
+```
+...
+2016-11-18 01:42:15 36311 [Note] InnoDB: Database was not shutdown normally!
+2016-11-18 01:42:15 36311 [Note] InnoDB: Starting crash recovery.
+...
+2016-11-18 01:42:16 36311 [Note] WSREP: Recovered position: 37bb872a-ad73-11e6-819f-f3b71d9c5ada:345628
+...
+2016-11-18 01:42:17 36311 [Note] /home/philips/git/mysql-wsrep-bugs-5.6/sql/mysqld: Shutdown complete
+```
+
+The number after the UUID string on the "Recovered position" line is the one to watch.
+
+Pick the volume that has the highest such number and edit its `grastate.dat` to set `safe_to_bootstrap: 1`:
+```
+# GALERA saved state
+version: 2.1
+uuid:    37bb872a-ad73-11e6-819f-f3b71d9c5ada
+seqno:   -1
+safe_to_bootstrap: 1
+```
+
+Remove the `--wsrep-recover` and continue as *Initialize volumes and cluster*
