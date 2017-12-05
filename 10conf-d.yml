@@ -64,6 +64,11 @@ data:
 
     HOST_ID=${HOSTNAME##*-}
 
+    STATEFULSET_SERVICE=$(dnsdomainname -d)
+    POD_FQDN=$(dnsdomainname -A)
+
+    echo "This is pod $HOST_ID ($POD_FQDN) for statefulset $STATEFULSET_SERVICE"
+
     [ -z "$DATADIR" ] && exit "Missing DATADIR variable" && exit 1
 
     # https://github.com/docker-library/mariadb/commit/f76084f0f9dc13f29cce48c727440eb79b4e92fa#diff-b0fa4b30392406b32de6b8ffe36e290dR80
@@ -75,6 +80,16 @@ data:
         # ... should log:
         #[Note] WSREP: 'wsrep-new-cluster' option used, bootstrapping the cluster
         #[Note] WSREP: Setting initial position to 00000000-0000-0000-0000-000000000000:-1
+      fi
+    else
+      if [ $HOST_ID -eq 0 ]; then
+        echo "This is the 1st statefulset pod, but with data. Checking if the statefulset is down ..."
+        getent hosts mariadb
+        [ $? -eq 2 ] && {
+          echo "Yes, guessing we have to bootstrap the galera cluster"
+          sed -i 's|#init#wsrep_provider_options="pc.bootstrap=true"#init#|wsrep_provider_options="pc.bootstrap=true"|' /etc/mysql/conf.d/galera.cnf
+          sed -i 's|wsrep_cluster_address=.*|\0?pc.wait_prim=no|' /etc/mysql/conf.d/galera.cnf
+        }
       fi
     fi
 
