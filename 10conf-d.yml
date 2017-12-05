@@ -19,7 +19,6 @@ data:
     wsrep_provider="/usr/lib/galera/libgalera_smm.so"
     #init-new-cluster#wsrep_new_cluster=true
     #init-bootstrap#wsrep_provider_options="pc.bootstrap=TRUE;pc.wait_prim=FALSE"
-    #init-recovery#wsrep_provider_options="pc.recovery=TRUE"
     wsrep_cluster_address="gcomm://mariadb-0.mariadb,mariadb-1.mariadb,mariadb-2.mariadb"
     binlog_format=ROW
     default_storage_engine=InnoDB
@@ -89,8 +88,7 @@ data:
         [ $? -eq 2 ] && {
           echo "Yes, guessing we have to bootstrap the galera cluster"
           #sed -i 's|^#init-bootstrap#||' /etc/mysql/conf.d/galera.cnf
-          sed -i 's|wsrep_cluster_address=.*|wsrep_cluster_address="gcomm://mariadb-anystatus"|' /etc/mysql/conf.d/galera.cnf
-          sed -i 's|^#init-recovery#||' /etc/mysql/conf.d/galera.cnf
+          sed -i 's|wsrep_cluster_address=.*|wsrep_cluster_address="gcomm://mariadb-anystatus?pc.recovery=TRUE"|' /etc/mysql/conf.d/galera.cnf
         }
       fi
     fi
