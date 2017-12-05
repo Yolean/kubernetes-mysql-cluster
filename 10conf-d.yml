@@ -88,7 +88,7 @@ data:
         [ $? -eq 2 ] && {
           echo "Yes, guessing we have to bootstrap the galera cluster"
           sed -i 's|#init#wsrep_provider_options="pc.bootstrap=true"#init#|wsrep_provider_options="pc.bootstrap=true"|' /etc/mysql/conf.d/galera.cnf
-          sed -i 's|wsrep_cluster_address=.*|wsrep_cluster_address="gcomm://mariadb?pc.wait_prim=no"|' /etc/mysql/conf.d/galera.cnf
+          sed -i 's|wsrep_cluster_address=.*|wsrep_cluster_address="gcomm://mariadb-anystatus?pc.wait_prim=no"|' /etc/mysql/conf.d/galera.cnf
         }
       fi
     fi
