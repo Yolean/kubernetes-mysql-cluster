@@ -79,4 +79,4 @@ data:
     fi
 
     # https://github.com/docker-library/mariadb/blob/master/10.2/docker-entrypoint.sh#L62
-    mysqld --verbose --help --log-bin-index="$(mktemp -u)"
+    mysqld --verbose --help --log-bin-index="$(mktemp -u)" | tee /tmp/mariadb-start-config | grep -e ^version -e ^datadir -e ^wsrep -e ^binlog -e ^character-set -e ^collation
