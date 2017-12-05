@@ -17,8 +17,8 @@ data:
     # Mandatory settings
     wsrep_on=ON
     wsrep_provider="/usr/lib/galera/libgalera_smm.so"
-    #init#wsrep_new_cluster=true#init#
-    #init#wsrep_provider_options="pc.bootstrap=true"#init#
+    #init-new-cluster#wsrep_new_cluster=true
+    #init-bootstrap#wsrep_provider_options="pc.bootstrap=TRUE;pc.wait_prim=FALSE"
     wsrep_cluster_address="gcomm://mariadb-0.mariadb,mariadb-1.mariadb,mariadb-2.mariadb"
     binlog_format=ROW
     default_storage_engine=InnoDB
@@ -76,7 +76,7 @@ data:
       echo "No database in $DATADIR; configuring $POD_NAME for initial start"
 
       if [ $HOST_ID -eq 0 ]; then
-        sed -i 's|#init#wsrep_new_cluster=true#init#|wsrep_new_cluster=true|' /etc/mysql/conf.d/galera.cnf
+        sed -i 's|^#init-new-cluster#||' /etc/mysql/conf.d/galera.cnf
         # ... should log:
         #[Note] WSREP: 'wsrep-new-cluster' option used, bootstrapping the cluster
         #[Note] WSREP: Setting initial position to 00000000-0000-0000-0000-000000000000:-1
@@ -87,8 +87,8 @@ data:
         getent hosts mariadb
         [ $? -eq 2 ] && {
           echo "Yes, guessing we have to bootstrap the galera cluster"
-          sed -i 's|#init#wsrep_provider_options="pc.bootstrap=true"#init#|wsrep_provider_options="pc.bootstrap=true"|' /etc/mysql/conf.d/galera.cnf
-          sed -i 's|wsrep_cluster_address=.*|wsrep_cluster_address="gcomm://mariadb-anystatus?pc.wait_prim=no"|' /etc/mysql/conf.d/galera.cnf
+          sed -i 's|^#init-bootstrap#||' /etc/mysql/conf.d/galera.cnf
+          sed -i 's|wsrep_cluster_address=.*|wsrep_cluster_address="gcomm://mariadb-anystatus"|' /etc/mysql/conf.d/galera.cnf
         }
       fi
     fi
