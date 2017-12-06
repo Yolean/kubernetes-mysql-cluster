@@ -66,10 +66,6 @@ Could use [SQL](https://github.com/ausov/k8s-mariadb-cluster/blob/stable-10.1/ex
 
 Haven't looked for examples yet. Just check if the instance is up and running.
 
-### Metrics
-
-For Prometheus... TODO.
-
 ## Preparations
 
 Unless your Kubernetes setup has volume provisioning for StatefulSet (GKE has) you need to make sure the [Persistent Volumes](http://kubernetes.io/docs/user-guide/persistent-volumes/) exist first.
@@ -91,12 +87,39 @@ Watch logs for "sst" or "Quorum results", or run this quick check:
 for i in 0 1 2; do kubectl -n mysql exec mariadb-$i -- mysql -e "SHOW STATUS LIKE 'wsrep_cluster_size';" -N; done
 ```
 
-The value is also a metric in the [Prometheus](https://prometheus.io) endpoint:
+Port 9104 exposes plaintext metris in [Prometheus](https://prometheus.io/docs/concepts/data_model/) scrape format.
 ```
 # with kubectl -n mysql port-forward mariadb-0 9104:9104
 $ curl -s http://localhost:9104/metrics | grep ^mysql_global_status_wsrep_cluster_size
 mysql_global_status_wsrep_cluster_size 3
 ```
+
+A reasonable alert is on `mysql_global_status_wsrep_cluster_size` staying below the desired number of replicas.
+
+### Cluster un-health
+
+We need to assume a couple of things here. First and foremost:
+Production clusters are configured so that the statefulset pods do not go down together.
+
+ * Pods are properly spread across nodes - which this repo can try to test.
+ * Nodes are spread across multiple availability zones.
+
+Let's also assume there is monitoring.
+Any `wsrep_cluster_size` issue (see above), or absence of `wsrep_cluster_size`
+should lead to a human being paged.
+
+Rarity combined with manual attention means that this statefulset can/should avoid
+attempts at automatic [recovery](http://galeracluster.com/documentation-webpages/pcrecovery.html).
+The reason for that is that we can't test for failure modes properly,
+as they depend on the Kubernetes setup.
+Automatic attempts may appint the wrong leader, losing writes,
+or cause split-brain situations.
+
+We can however support detection in the init script.
+
+Scaling down to two instances
+-- actually one instance, but nodes should be considered ephemeral so don't do that --
+and up to any number is considered normal operations.
 
 ### phpMyAdmin
 
