@@ -1,39 +1,14 @@
 # MySQL with automatic failover on Kubernetes
 
-Our requirement was an SQL server for modest loads
-but with high availability because it backs our login system
-and public web.
+This is a galera cluster setup, with plain manifests.
+We actually use it in production, though with modest loads.
 
-We want automatic failover, not manual, and a single configuration to maintain, not leaders and followers.
+## Get started
 
-Initially we tried Postgres, but clustering solutions like [pgpool-II]() felt a bit outdated, and [patroni](https://github.com/zalando/patroni) etc was overly complex for our needs.
+First create a storage class `mysql-data`. See exampels in `./configure/`.
+You might also want to edit the volume size request, at the bottom of `./50mariadb.yml`.
 
-[Galera](http://galeracluster.com/) is a good fit for us with Kubernetes because it allows nodes to share the same configuration through `wsrep_cluster_address="gcomm://host-0,host-1`... where access to only 1 of those instances lets a new instance join the cluster.
-
-As of [MariaDB](https://mariadb.com/) [10.1](https://mariadb.com/kb/en/mariadb/what-is-mariadb-galera-cluster/) the [official docker image](https://hub.docker.com/_/mariadb/) comes with "wsrep" support. Using official images direcly mean less maintenance for us.
-We'll use an init container, instead of a custom image with modified entrypoint.
-
-Using a semi-manual bootstrap process and a container with galera support built in, we were able to simplify the setup and thus the maintenance.
-
-## What's new since our initial setup?
-
- * https://github.com/ausov/k8s-mariadb-cluster
- * [https://github.com/kubernetes/website/blob/master/docs/tasks/run-application/run-replicated-stateful-application.md](https://kubernetes.io/docs/tasks/run-application/run-replicated-stateful-application/)
- * https://github.com/openstack/kolla-kubernetes/blob/master/helm/service/mariadb/requirements.yaml
- * https://github.com/kubernetes/contrib/tree/master/peer-finder
-
-## Preparations
-
-Unless your Kubernetes setup has volume provisioning for StatefulSet (GKE has) you need to make sure the [Persistent Volumes](http://kubernetes.io/docs/user-guide/persistent-volumes/) exist first.
-
-Then:
- * Create namespace.
- * Create `10pvc.yml` if you created PVs manually.
- * Create configmap (see `40configmap.sh`) and secret (see `41secret.sh`).
- * Create StatefulSet's "headless" service `20mariadb-service.yml`.
- * Create the service that other applications depend on `30mysql-service.yml`.
-
-After that start bootstrapping.
+Then: `kubectl apply -f .`.
 
 ### Cluster Health
 
@@ -68,7 +43,7 @@ Rarity combined with manual attention means that this statefulset can/should avo
 attempts at automatic [recovery](http://galeracluster.com/documentation-webpages/pcrecovery.html).
 The reason for that is that we can't test for failure modes properly,
 as they depend on the Kubernetes setup.
-Automatic attempts may appint the wrong leader, losing writes,
+Automatic attempts may appoint the wrong leader, losing writes,
 or cause split-brain situations.
 
 We can however support detection in the init script.
