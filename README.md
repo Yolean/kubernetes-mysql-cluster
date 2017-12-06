@@ -46,17 +46,6 @@ Start `mysqld` with [--wsrep-new-cluster](https://mariadb.com/kb/en/library/gett
 We're fine with manual `replicas` change, i.e. before `kubectl apply` we'll also edit
 [wsrep_cluster_address](https://mariadb.com/kb/en/library/getting-started-with-mariadb-galera-cluster/#adding-another-node-to-a-cluster).
 
-### Restarting the cluster
-
-If all pods have been down, we must do
-[pc.bootstrap=true](https://mariadb.com/kb/en/library/getting-started-with-mariadb-galera-cluster/#restarting-the-cluster) if the following conditions are met:
- * It's the first replica, i.e. pod index from StatefulSet is `0`.
- * There _is_ state in the data volume, i.e. we have a cluster [UUID](https://mariadb.com/kb/en/library/getting-started-with-mariadb-galera-cluster/#bootstrapping-a-new-cluster).
-
-And [pc.wait_prim=no](https://mariadb.com/kb/en/library/getting-started-with-mariadb-galera-cluster/#restarting-the-cluster) on the following:
- * Not the first replica.
- * TODO what's the difference here between first cluster start and cluster _re_start?
-
 ### Readiness
 
 Maybe we should consider an instance ready only if it finds a peer.
