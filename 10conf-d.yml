@@ -17,8 +17,9 @@ data:
     # Mandatory settings
     wsrep_on=ON
     wsrep_provider="/usr/lib/galera/libgalera_smm.so"
-    #init-new-cluster#wsrep_new_cluster=true
-    #init-recovery#wsrep_provider_options="pc.recovery=TRUE"
+    #init-new-cluster#wsrep_new_cluster=TRUE
+    #init-recovery-automatic#wsrep_provider_options="pc.recovery=TRUE"
+    #init-recover#wsrep_recover=TRUE
     #init-bootstrap#wsrep_provider_options="pc.bootstrap=TRUE;pc.wait_prim=FALSE"
     wsrep_cluster_address="gcomm://mariadb-0.mariadb,mariadb-1.mariadb,mariadb-2.mariadb"
     binlog_format=ROW
@@ -78,8 +79,8 @@ data:
       sed -i 's|^#init-new-cluster#||' /etc/mysql/conf.d/galera.cnf
     }
 
-    function wsrepRecovery {
-      sed -i 's|^#init-recovery#||' /etc/mysql/conf.d/galera.cnf
+    function wsrepRecover {
+      sed -i 's|^#init-recover#||' /etc/mysql/conf.d/galera.cnf
     }
 
     [[ $STATEFULSET_SERVICE = mariadb.* ]] || echo "WARNING: unexpected service name $STATEFULSET_SERVICE, Peer detection below may fail falsely."
@@ -96,26 +97,26 @@ data:
           set +x
           echo "----- ACTION REQUIRED -----"
           echo "No peers found, but data exists. To start in wsrep_new_cluster mode, run:"
-          echo "  $SUGGEST_EXEC_COMMAND touch /tmp/confirm-wsrep-new-cluster"
+          echo "  $SUGGEST_EXEC_COMMAND touch /tmp/confirm-new-cluster"
           echo "Or to start in recovery mode, to see replication state, run:"
-          echo "  $SUGGEST_EXEC_COMMAND touch /tmp/confirm-recovery-mode"
+          echo "  $SUGGEST_EXEC_COMMAND touch /tmp/confirm-recover"
           echo "Or to try a regular start (for example after recovery + manual intervention), run:"
           echo "  $SUGGEST_EXEC_COMMAND touch /tmp/confirm-resume"
           echo "Waiting for response ..."
           while [ ! -f /tmp/confirm-resume ]; do
             sleep 1
-            if [ "$AUTO_NEW_CLUSTER" = "yes" ]; then
-              echo "The AUTO_NEW_CLUSTER env was set to $AUTO_NEW_CLUSTER, so won't wait for confirmation"
+            if [ "$AUTO_NEW_CLUSTER" = "true" ]; then
+              echo "The AUTO_NEW_CLUSTER env was set to $AUTO_NEW_CLUSTER, will proceed without confirmation"
               wsrepNewCluster
               touch /tmp/confirm-resume
-            elif [ -f /tmp/confirm-wsrep-new-cluster ]; then
+            elif [ -f /tmp/confirm-new-cluster ]; then
               echo "Confirmation received. Resuming new cluster start ..."
               wsrepNewCluster
               touch /tmp/confirm-resume
-            elif [ -f /tmp/confirm-recovery-mode ]; then
+            elif [ -f /tmp/confirm-recover ]; then
               echo "Confirmation received. Resuming in recovery mode."
               echo "Note: for the other pods you need to edit OrderedReady and add a command: --wsrep-recover"
-              wsrepRecovery
+              wsrepRecover
               touch /tmp/confirm-resume
             fi
           done

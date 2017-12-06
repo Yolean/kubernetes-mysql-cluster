@@ -37,6 +37,8 @@ spec:
               fieldPath: metadata.namespace
         - name: DATADIR
           value: /data/db
+        - name: AUTO_NEW_CLUSTER
+          value: "false"
         volumeMounts:
         - name: mysql
           mountPath: /data
