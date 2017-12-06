@@ -18,9 +18,7 @@ data:
     wsrep_on=ON
     wsrep_provider="/usr/lib/galera/libgalera_smm.so"
     #init-new-cluster#wsrep_new_cluster=TRUE
-    #init-recovery-automatic#wsrep_provider_options="pc.recovery=TRUE"
     #init-recover#wsrep_recover=TRUE
-    #init-bootstrap#wsrep_provider_options="pc.bootstrap=TRUE;pc.wait_prim=FALSE"
     wsrep_cluster_address="gcomm://mariadb-0.mariadb,mariadb-1.mariadb,mariadb-2.mariadb"
     binlog_format=ROW
     default_storage_engine=InnoDB
