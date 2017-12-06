@@ -21,7 +21,7 @@ spec:
       terminationGracePeriodSeconds: 30
       initContainers:
       - name: init-config
-        command: ['/bin/sh', '/etc/mysql/conf.d/init.sh']
+        command: ['/bin/bash', '/etc/mysql/conf.d/init.sh']
         env:
         - name: K8S_NODE_NAME
           valueFrom:
