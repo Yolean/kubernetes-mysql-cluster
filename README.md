@@ -32,25 +32,25 @@ A reasonable alert is on `mysql_global_status_wsrep_cluster_size` staying below 
 We need to assume a couple of things here. First and foremost:
 Production clusters are configured so that the statefulset pods do not go down together.
 
- * Pods are properly spread across nodes - which this repo can try to test.
+ * Pods are properly spread across nodes.
  * Nodes are spread across multiple availability zones.
 
-Let's also assume there is monitoring.
+Let's also assume that there is monitoring.
 Any `wsrep_cluster_size` issue (see above), or absence of `wsrep_cluster_size`
 should lead to a human being paged.
 
 Rarity combined with manual attention means that this statefulset can/should avoid
 attempts at automatic [recovery](http://galeracluster.com/documentation-webpages/pcrecovery.html).
-The reason for that is that we can't test for failure modes properly,
+The reason for that being: we can't test for failure modes properly,
 as they depend on the Kubernetes setup.
-Automatic attempts may appoint the wrong leader, losing writes,
+Automation may appoint the wrong leader - losing writes -
 or cause split-brain situations.
 
 We can however support detection in the init script.
 
-Scaling down to two instances
--- actually one instance, but nodes should be considered ephemeral so don't do that --
-and up to any number is considered normal operations.
+It's normal operations to scale down to two instances
+- actually one instance, but nodes should be considered ephemeral so don't do that -
+and up to any number of replicas.
 
 ### phpMyAdmin
 
