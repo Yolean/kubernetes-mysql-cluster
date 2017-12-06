@@ -22,15 +22,6 @@ Using a semi-manual bootstrap process and a container with galera support built 
  * https://github.com/openstack/kolla-kubernetes/blob/master/helm/service/mariadb/requirements.yaml
  * https://github.com/kubernetes/contrib/tree/master/peer-finder
 
-### Readiness
-
-Maybe we should consider an instance ready only if it finds a peer.
-Could use [SQL](https://github.com/ausov/k8s-mariadb-cluster/blob/stable-10.1/example/galera.yaml#L71) but with [wsrep status](https://mariadb.com/kb/en/library/getting-started-with-mariadb-galera-cluster/#monitoring).
-
-### Liveness
-
-Haven't looked for examples yet. Just check if the instance is up and running.
-
 ## Preparations
 
 Unless your Kubernetes setup has volume provisioning for StatefulSet (GKE has) you need to make sure the [Persistent Volumes](http://kubernetes.io/docs/user-guide/persistent-volumes/) exist first.
