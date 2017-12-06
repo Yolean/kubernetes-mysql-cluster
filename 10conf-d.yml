@@ -115,11 +115,12 @@ data:
               touch /tmp/confirm-resume
             elif [ -f /tmp/confirm-recover ]; then
               echo "Confirmation received. Resuming in recovery mode."
-              echo "Note: for the other pods you need to edit OrderedReady and add a command: --wsrep-recover"
+              echo "Note: to start the other pods you need to edit OrderedReady and add a command: --wsrep-recover"
               wsrepRecover
               touch /tmp/confirm-resume
             fi
           done
+          rm /tmp/confirm-*
           set -x
         fi
       }
