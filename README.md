@@ -22,30 +22,6 @@ Using a semi-manual bootstrap process and a container with galera support built 
  * https://github.com/openstack/kolla-kubernetes/blob/master/helm/service/mariadb/requirements.yaml
  * https://github.com/kubernetes/contrib/tree/master/peer-finder
 
-## Tradeoffs
-
-Testing this is a TODO.
-
-The database should remain available during cluster upgrades and node replacement, i.e. when something like 1 out of 3 VMs is gone. A Kubernetes upgrade on GKE means 1 at a time is gone, with only a short period of time between one upgrade completes and the next starts.
-
-Failure on 2 VMs concurrently probably mean our cluster is going down badly, and that SQL downtime isn't our major headache. In this case we expect the DB to recover automatically once 2 out of 3 nodes are live.
-
-With 3 nodes we aim for the following characteristics, prioritizing consistency over performance:
- * Consistent reads if 1 or even 2 nodes are gone.
- * Block writes if 2 nodes are gone.
- * Ideally accept writes if 1 nodes are gone.
-
-### Bootstrapping
-
-Start `mysqld` with [--wsrep-new-cluster](https://mariadb.com/kb/en/library/getting-started-with-mariadb-galera-cluster/#bootstrapping-a-new-cluster) when both of these conditions are met:
- * It's the first replica, i.e. pod index from StatefulSet is `0`.
- * The data volume is empty, at the time of running the init container.
-
-### Adding a node
-
-We're fine with manual `replicas` change, i.e. before `kubectl apply` we'll also edit
-[wsrep_cluster_address](https://mariadb.com/kb/en/library/getting-started-with-mariadb-galera-cluster/#adding-another-node-to-a-cluster).
-
 ### Readiness
 
 Maybe we should consider an instance ready only if it finds a peer.
