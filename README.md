@@ -63,5 +63,5 @@ kubectl apply -f myadmin/
 PhpMyAdmin has a login page where you need a mysql user. To allow login (with full access) create a user with your choice of password:
 
 ```
-kubectl -n mysql exec mariadb-0 -- mysql -e "CREATE USER 'phpmyadmin'@'%' IDENTIFIED BY 'my-admin-pw'; GRANT ALL ON *.* TO 'phpmyadmin'@'%';"
+kubectl -n mysql exec mariadb-0 -- mysql -e "CREATE USER 'phpmyadmin'@'%' IDENTIFIED BY 'my-admin-pw'; GRANT ALL ON *.* TO 'phpmyadmin'@'%' WITH GRANT OPTION;"
 ```
