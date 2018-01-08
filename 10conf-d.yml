@@ -19,7 +19,7 @@ data:
     wsrep_provider="/usr/lib/galera/libgalera_smm.so"
     #init-new-cluster#wsrep_new_cluster=TRUE
     #init-recover#wsrep_recover=TRUE
-    wsrep_cluster_address="gcomm://mariadb-0.mariadb,mariadb-1.mariadb,mariadb-2.mariadb"
+    wsrep_cluster_address="gcomm://mariadb-0.mariadb,mariadb-1.mariadb"
     binlog_format=ROW
     default_storage_engine=InnoDB
     innodb_autoinc_lock_mode=2
