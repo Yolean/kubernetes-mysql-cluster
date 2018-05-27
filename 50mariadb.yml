@@ -39,6 +39,7 @@ spec:
           value: /data/db
         - name: AUTO_NEW_CLUSTER
           value: "false"
+        workingDir: /etc/mysql/conf.d-configmap
         volumeMounts:
         - name: mysql
           mountPath: /data
