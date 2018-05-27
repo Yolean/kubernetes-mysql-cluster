@@ -1,4 +1,4 @@
-apiVersion: apps/v1beta2
+apiVersion: apps/v1
 kind: StatefulSet
 metadata:
   name: mariadb
@@ -46,10 +46,10 @@ spec:
           mountPath: /etc/mysql/conf.d
         - name: initdb
           mountPath: /docker-entrypoint-initdb.d
-        image: mariadb:10.2.12@sha256:862de06a9b35f001e87bbefbb49008e84a59c4afd089c9a320947a9ae0e7cf1a
+        image: mariadb:10.2.14@sha256:cc58429dc130add37a006744a1eb62510396d608aeec219dbdf0befc1843daab
       containers:
       - name: mariadb
-        image: mariadb:10.2.12@sha256:862de06a9b35f001e87bbefbb49008e84a59c4afd089c9a320947a9ae0e7cf1a
+        image: mariadb:10.2.14@sha256:cc58429dc130add37a006744a1eb62510396d608aeec219dbdf0befc1843daab
         ports:
         - containerPort: 3306
           name: mysql
@@ -116,4 +116,4 @@ spec:
       storageClassName: mysql-data
       resources:
         requests:
-          storage: 2Gi
+          storage: 1Gi
