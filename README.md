@@ -15,12 +15,12 @@ Then: `kubectl apply -f .`.
 Readiness and liveness probes will only assert client-level health of individual pods.
 Watch logs for "sst" or "Quorum results", or run this quick check:
 ```
-for i in 0 1 2; do kubectl -n mysql exec mariadb-$i -- mysql -e "SHOW STATUS LIKE 'wsrep_cluster_size';" -N; done
+for i in 0 1 2; do kubectl -n analytics exec mariadb-$i -- mysql -e "SHOW STATUS LIKE 'wsrep_cluster_size';" -N; done
 ```
 
 Port 9104 exposes plaintext metris in [Prometheus](https://prometheus.io/docs/concepts/data_model/) scrape format.
 ```
-# with kubectl -n mysql port-forward mariadb-0 9104:9104
+# with kubectl -n analytics port-forward mariadb-0 9104:9104
 $ curl -s http://localhost:9104/metrics | grep ^mysql_global_status_wsrep_cluster_size
 mysql_global_status_wsrep_cluster_size 3
 ```
@@ -63,5 +63,5 @@ kubectl apply -f myadmin/
 PhpMyAdmin has a login page where you need a mysql user. To allow login (with full access) create a user with your choice of password:
 
 ```
-kubectl -n mysql exec mariadb-0 -- mysql -e "CREATE USER 'phpmyadmin'@'%' IDENTIFIED BY 'my-admin-pw'; GRANT ALL ON *.* TO 'phpmyadmin'@'%' WITH GRANT OPTION;"
+kubectl -n analytics exec mariadb-0 -- mysql -e "CREATE USER 'phpmyadmin'@'%' IDENTIFIED BY 'my-admin-pw'; GRANT ALL ON *.* TO 'phpmyadmin'@'%' WITH GRANT OPTION;"
 ```
