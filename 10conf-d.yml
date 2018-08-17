@@ -82,6 +82,10 @@ data:
       sed -i 's|^#init-recover#||' /etc/mysql/conf.d/galera.cnf
     }
 
+    function wsrepForceBootstrap {
+      sed -i 's|safe_to_bootstrap: 0|safe_to_bootstrap: 1|' /data/db/grastate.dat
+    }
+
     [[ $STATEFULSET_SERVICE = mariadb.* ]] || echo "WARNING: unexpected service name $STATEFULSET_SERVICE, Peer detection below may fail falsely."
 
     if [ $HOST_ID -eq 0 ]; then
@@ -99,6 +103,10 @@ data:
           echo "  $SUGGEST_EXEC_COMMAND touch /tmp/confirm-new-cluster"
           echo "Or to start in recovery mode, to see replication state, run:"
           echo "  $SUGGEST_EXEC_COMMAND touch /tmp/confirm-recover"
+          echo "Or to force bootstrap on this node, potentially losing writes, run:"
+          echo "  $SUGGEST_EXEC_COMMAND touch /tmp/confirm-force-bootstrap"
+          #echo "    NOTE This bypasses the following warning from new cluster mode:"
+          #echo "    It may not be safe to bootstrap the cluster from this node. It was not the last one to leave the cluster and may not contain all the updates. To force cluster bootstrap with this node, edit the grastate.dat file manually and set safe_to_bootstrap to 1 ."
           echo "Or to try a regular start (for example after recovery + manual intervention), run:"
           echo "  $SUGGEST_EXEC_COMMAND touch /tmp/confirm-resume"
           echo "Waiting for response ..."
@@ -112,6 +120,10 @@ data:
               echo "Confirmation received. Resuming new cluster start ..."
               wsrepNewCluster
               touch /tmp/confirm-resume
+            elif [ -f /tmp/confirm-force-bootstrap ]; then
+              echo "Forcing bootstrap on this node ..."
+              wsrepForceBootstrap
+              touch /tmp/confirm-new-cluster
             elif [ -f /tmp/confirm-recover ]; then
               echo "Confirmation received. Resuming in recovery mode."
               echo "Note: to start the other pods you need to edit OrderedReady and add a command: --wsrep-recover"
