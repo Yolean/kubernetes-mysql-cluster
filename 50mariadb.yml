@@ -49,10 +49,10 @@ spec:
           mountPath: /etc/mysql/conf.d
         - name: initdb
           mountPath: /docker-entrypoint-initdb.d
-        image: mariadb:10.2.22@sha256:46ba163f20028200a62eb1a9aa347975d3acab3d2c6bd786e1d71f932a170799
+        image: mariadb:10.2.23@sha256:af57a388784d08cd2d4f054fabfc53aa9144a961a3a1be8067a5cf9443d01646
       containers:
       - name: mariadb
-        image: mariadb:10.2.22@sha256:46ba163f20028200a62eb1a9aa347975d3acab3d2c6bd786e1d71f932a170799
+        image: mariadb:10.2.23@sha256:af57a388784d08cd2d4f054fabfc53aa9144a961a3a1be8067a5cf9443d01646
         ports:
         - containerPort: 3306
           name: mysql
