@@ -1,5 +1,5 @@
 bases:
-- github.com/Yolean/kubernetes-mysql-cluster?ref=41d167e
+- github.com/Yolean/kubernetes-mysql-cluster?ref=009cad0
 resources:
 - gke-storageclass-ssd.yml
 #- gke-storageclass-ssd-regional-europewest1cd.yaml
