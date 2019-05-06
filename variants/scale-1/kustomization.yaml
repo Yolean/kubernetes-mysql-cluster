@@ -1,4 +1,4 @@
 bases:
-- ../../
+- github.com/Yolean/kubernetes-mysql-cluster?ref=41d167e
 patchesStrategicMerge:
 - replicas-1.yaml
