@@ -1,0 +1,6 @@
+resources:
+- 00namespace.yml
+- 10conf-d.yml
+- 20mariadb-service.yml
+- 30mysql-service.yml
+- 50mariadb.yml
