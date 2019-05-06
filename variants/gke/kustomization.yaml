@@ -1,0 +1,7 @@
+bases:
+- ../../
+resources:
+- gke-storageclass-ssd.yml
+#- gke-storageclass-ssd-regional-europewest1cd.yaml
+patchesStrategicMerge:
+- volume-claims.yaml
