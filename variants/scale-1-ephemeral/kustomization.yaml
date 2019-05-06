@@ -1,0 +1,4 @@
+bases:
+- ../scale-1
+patchesStrategicMerge:
+- ephemeral.yaml
