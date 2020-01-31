@@ -1,5 +1,5 @@
-# NOTE: the configmap's wsrep_cluster_address value isn't updated, so mysql will still look for 2 peers
 bases:
 - github.com/Yolean/kubernetes-mysql-cluster?ref=009cad0
 patchesStrategicMerge:
 - replicas-1.yaml
+- wsrep-1.yaml

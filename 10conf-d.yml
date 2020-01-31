@@ -19,10 +19,10 @@ data:
     wsrep_provider="/usr/lib/galera/libgalera_smm.so"
     #init-new-cluster#wsrep_new_cluster=TRUE
     #init-recover#wsrep_recover=TRUE
-    wsrep_cluster_address="gcomm://mariadb-0.mariadb,mariadb-1.mariadb,mariadb-2.mariadb"
     binlog_format=ROW
     default_storage_engine=InnoDB
     innodb_autoinc_lock_mode=2
+    #init-wsrep#wsrep_cluster_address="gcomm://mariadb-0.mariadb,mariadb-1.mariadb,mariadb-2.mariadb"
     wsrep-sst-method=rsync
 
     #
@@ -69,6 +69,9 @@ data:
     POD_FQDN=$(dnsdomainname -A)
 
     echo "This is pod $HOST_ID ($POD_FQDN) for statefulset $STATEFULSET_SERVICE"
+
+    [ -z "$WSREP_CLUSTER_ADDRESS" ] && echo "Missing WSREP_CLUSTER_ADDRESS env" && exit 1
+    sed -i "s|^#init-wsrep#.*|wsrep_cluster_address=$WSREP_CLUSTER_ADDRESS|"
 
     [ -z "$DATADIR" ] && exit "Missing DATADIR variable" && exit 1
 

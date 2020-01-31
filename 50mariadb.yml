@@ -72,6 +72,8 @@ spec:
           value: "yes"
         - name: MYSQL_INITDB_SKIP_TZINFO
           value: "yes"
+        - name: WSREP_CLUSTER_ADDRESS
+          value: "gcomm://mariadb-0.mariadb,mariadb-1.mariadb,mariadb-2.mariadb"
         readinessProbe:
           exec:
             command:
