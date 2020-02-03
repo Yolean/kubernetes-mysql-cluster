@@ -71,7 +71,7 @@ data:
     echo "This is pod $HOST_ID ($POD_FQDN) for statefulset $STATEFULSET_SERVICE"
 
     [ -z "$WSREP_CLUSTER_ADDRESS" ] && echo "Missing WSREP_CLUSTER_ADDRESS env" && exit 1
-    sed -i "s|^#init-wsrep#.*|wsrep_cluster_address=$WSREP_CLUSTER_ADDRESS|"
+    sed -i "s|^#init-wsrep#.*|wsrep_cluster_address=$WSREP_CLUSTER_ADDRESS|" /etc/mysql/conf.d/galera.cnf
 
     [ -z "$DATADIR" ] && exit "Missing DATADIR variable" && exit 1
 
