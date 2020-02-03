@@ -79,11 +79,7 @@ spec:
             command:
             - /bin/sh
             - -ec
-            - >-
-              '['
-              ON =
-              $(mysql -e "SHOW STATUS LIKE 'wsrep_ready';" -N -B | sed 's/.*ON/ON/')
-              ']'
+            - test ON = "$(mysql -e "SHOW STATUS LIKE 'wsrep_ready';" -N -B | sed 's/wsrep_ready\t//')"
           initialDelaySeconds: 30
         livenessProbe:
           exec:
