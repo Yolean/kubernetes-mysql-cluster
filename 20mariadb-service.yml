@@ -6,9 +6,9 @@ metadata:
   name: mariadb
   namespace: mysql
   annotations:
-    service.alpha.kubernetes.io/tolerate-unready-endpoints: "false"
+    service.alpha.kubernetes.io/tolerate-unready-endpoints: "true"
 spec:
-  publishNotReadyAddresses: false
+  publishNotReadyAddresses: true
   clusterIP: None
   selector:
     app: mariadb

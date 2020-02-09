@@ -1,0 +1,12 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: mariadb
+spec:
+  template:
+    spec:
+      initContainers:
+      - name: init-config
+        env:
+        - name: WSREP_CLUSTER_ADDRESS
+          value: "gcomm://mariadb-0.mariadb"
