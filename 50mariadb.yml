@@ -37,8 +37,8 @@ spec:
               fieldPath: metadata.namespace
         - name: DATADIR
           value: /data/db
-        - name: AUTO_NEW_CLUSTER
-          value: "false"
+        - name: AUTO_RECOVERY_MODE
+          value: confirm-force-bootstrap
         - name: WSREP_CLUSTER_ADDRESS
           value: "gcomm://mariadb-0.mariadb,mariadb-1.mariadb,mariadb-2.mariadb"
         workingDir: /etc/mysql/conf.d-configmap
