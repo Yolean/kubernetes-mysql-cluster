@@ -112,9 +112,9 @@ data:
           #echo "    It may not be safe to bootstrap the cluster from this node. It was not the last one to leave the cluster and may not contain all the updates. To force cluster bootstrap with this node, edit the grastate.dat file manually and set safe_to_bootstrap to 1 ."
           echo "Or to try a regular start (for example after recovery + manual intervention), run:"
           echo "  $SUGGEST_EXEC_COMMAND touch /tmp/confirm-resume"
-          if [ $HOST_ID -eq 0 ] && [ ! -z "$AUTO_RECOVERY_MODE" ]; then
-            # The !=0 hosts are assumed to start normally, with Parallel pod management policy
+          if [ ! -z "$AUTO_RECOVERY_MODE" ]; then
             echo "The AUTO_RECOVERY_MODE env was set to $AUTO_RECOVERY_MODE, will trigger that choice"
+            [ $HOST_ID -ne 0 ] && echo "ERROR Shouldn't end up here for pod index > 0 as we assume OrderedReady" && exit 1
             touch /tmp/$AUTO_RECOVERY_MODE
           else
             echo "Waiting for response ..."
