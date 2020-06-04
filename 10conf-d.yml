@@ -145,6 +145,13 @@ data:
           set -x
         fi
       }
+    else
+      getent hosts mariadb-ready
+      [ $? -eq 2 ] && {
+        echo "This is NOT the 1st statefulset pod. Must not go up as primary."
+        echo "Found no ready pods. Will exit to trigger a crash loop back off."
+        exit 1
+      }
     fi
 
     # https://github.com/docker-library/mariadb/blob/master/10.2/docker-entrypoint.sh#L62
