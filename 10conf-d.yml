@@ -93,7 +93,7 @@ data:
 
     if [ $HOST_ID -eq 0 ]; then
       echo "This is the 1st statefulset pod. Checking if the statefulset is down ..."
-      getent hosts mariadb
+      getent hosts mariadb-ready
       [ $? -eq 2 ] && {
         # https://github.com/docker-library/mariadb/commit/f76084f0f9dc13f29cce48c727440eb79b4e92fa#diff-b0fa4b30392406b32de6b8ffe36e290dR80
         if [ ! -d "$DATADIR/mysql" ]; then
