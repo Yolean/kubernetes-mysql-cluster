@@ -93,7 +93,7 @@ data:
 
     if [ $HOST_ID -eq 0 ]; then
       echo "This is the 1st statefulset pod. Checking if the statefulset is down ..."
-      getent hosts mariadb
+      getent hosts mariadb-ready
       [ $? -eq 2 ] && {
         # https://github.com/docker-library/mariadb/commit/f76084f0f9dc13f29cce48c727440eb79b4e92fa#diff-b0fa4b30392406b32de6b8ffe36e290dR80
         if [ ! -d "$DATADIR/mysql" ]; then
@@ -112,11 +112,16 @@ data:
           #echo "    It may not be safe to bootstrap the cluster from this node. It was not the last one to leave the cluster and may not contain all the updates. To force cluster bootstrap with this node, edit the grastate.dat file manually and set safe_to_bootstrap to 1 ."
           echo "Or to try a regular start (for example after recovery + manual intervention), run:"
           echo "  $SUGGEST_EXEC_COMMAND touch /tmp/confirm-resume"
-          echo "Waiting for response ..."
+          if [ ! -z "$AUTO_RECOVERY_MODE" ]; then
+            echo "The AUTO_RECOVERY_MODE env was set to $AUTO_RECOVERY_MODE, will trigger that choice"
+            touch /tmp/$AUTO_RECOVERY_MODE
+          else
+            echo "Waiting for response ..."
+          fi
           while [ ! -f /tmp/confirm-resume ]; do
-            sleep 1
             if [ "$AUTO_NEW_CLUSTER" = "true" ]; then
               echo "The AUTO_NEW_CLUSTER env was set to $AUTO_NEW_CLUSTER, will proceed without confirmation"
+              echo "NOTE this env is deprecated, use AUTO_RECOVERY_MODE instead"
               wsrepNewCluster
               touch /tmp/confirm-resume
             elif [ -f /tmp/confirm-new-cluster ]; then
@@ -133,10 +138,18 @@ data:
               wsrepRecover
               touch /tmp/confirm-resume
             fi
+            sleep 1
           done
           rm /tmp/confirm-*
           set -x
         fi
+      }
+    else
+      getent hosts mariadb-ready
+      [ $? -eq 2 ] && {
+        echo "This is NOT the 1st statefulset pod. Must not go up as primary."
+        echo "Found no ready pods. Will exit to trigger a crash loop back off."
+        exit 1
       }
     fi
 

@@ -9,7 +9,7 @@ spec:
       app: mariadb
   serviceName: "mariadb"
   replicas: 3
-  podManagementPolicy: OrderedReady
+  podManagementPolicy: Parallel
   template:
     metadata:
       labels:
@@ -37,8 +37,8 @@ spec:
               fieldPath: metadata.namespace
         - name: DATADIR
           value: /data/db
-        - name: AUTO_NEW_CLUSTER
-          value: "false"
+        - name: AUTO_RECOVERY_MODE
+          value: confirm-force-bootstrap
         - name: WSREP_CLUSTER_ADDRESS
           value: "gcomm://mariadb-0.mariadb,mariadb-1.mariadb,mariadb-2.mariadb"
         workingDir: /etc/mysql/conf.d-configmap
@@ -51,10 +51,10 @@ spec:
           mountPath: /etc/mysql/conf.d
         - name: initdb
           mountPath: /docker-entrypoint-initdb.d
-        image: mariadb:10.2.31@sha256:1e1193ba3708a73ee28c2ab56c5c6527b39ac58510d19252f020c0903aa5d86a
+        image: mariadb:10.2.32-bionic@sha256:7f9ef5c4dfd39efccbd80e6add152c672e6c63486874d83ce3f60c5a6ba33b47
       containers:
       - name: mariadb
-        image: mariadb:10.2.31@sha256:1e1193ba3708a73ee28c2ab56c5c6527b39ac58510d19252f020c0903aa5d86a
+        image: mariadb:10.2.32-bionic@sha256:7f9ef5c4dfd39efccbd80e6add152c672e6c63486874d83ce3f60c5a6ba33b47
         ports:
         - containerPort: 3306
           name: mysql
