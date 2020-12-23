@@ -1,0 +1,5 @@
+resources:
+- mariadb-service.yaml
+- mariadb-ready-service.yaml
+- mysql-service.yaml
+- mariadb-statefulset.yaml

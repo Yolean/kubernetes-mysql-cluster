@@ -1,0 +1,75 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: mariadb
+spec:
+  selector:
+    matchLabels:
+      app: mariadb
+  serviceName: "mariadb"
+  replicas: 1
+  podManagementPolicy: Parallel
+  template:
+    metadata:
+      labels:
+        app: mariadb
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "9104"
+    spec:
+      terminationGracePeriodSeconds: 30
+      containers:
+      - name: mariadb
+        image: mariadb:10.5.8-focal@sha256:cdc553f0515a8d41264f0855120874e86761f7c69407b5cfbe49283dc195bea8
+        args:
+        - --character-set-server=utf8
+        - --collation-server=utf8_unicode_ci
+        env:
+        - name: MYSQL_ROOT_HOST
+          value: "localhost"
+        - name: MYSQL_ALLOW_EMPTY_PASSWORD
+          value: "yes"
+        - name: MYSQL_INITDB_SKIP_TZINFO
+          value: "yes"
+        ports:
+        - containerPort: 3306
+          name: mysql
+        readinessProbe:
+          exec:
+            command:
+            - mysql
+            - -e
+            - "SHOW DATABASES;"
+        livenessProbe:
+          exec:
+            command:
+            - mysql
+            - -e
+            - "SHOW DATABASES;"
+        resources:
+          requests:
+            cpu: 10m
+            memory: 100Mi
+        volumeMounts:
+        - name: mysql
+          mountPath: /data
+        - name: initdb
+          mountPath: /docker-entrypoint-initdb.d
+      - name: metrics
+        image: prom/mysqld-exporter:v0.12.1@sha256:9fe9938c4ac9216cc24005144338f14fac4f604f139b481cc541bead008db3c1
+        env:
+        - name: DATA_SOURCE_NAME
+          value: root@(localhost:3306)/
+        ports:
+        - containerPort: 9104
+      volumes:
+      - name: initdb
+        emptyDir: {}
+  volumeClaimTemplates:
+  - metadata:
+      name: mysql
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      resources:
+        requests:
+          storage: 1Gi
