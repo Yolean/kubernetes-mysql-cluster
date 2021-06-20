@@ -1,0 +1,40 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+# See also the override below
+namespace: mysqltest
+
+resources:
+- ../../unhelm/mysql/mariadb-galera/
+- ./mysql-service.yaml
+
+secretGenerator:
+- name: mariadb-auth
+  literals:
+  - mariadb-root-password=TESTROOT
+  - mariadb-galera-mariabackup-password=TESTBACKUP
+  - mariadb-password=TESTMARIADB
+
+images:
+- name: docker.io/bitnami/mariadb-galera
+  # 10.5.10-debian-10-r26
+  digest: sha256:c8be8e01d6e5a594e1caa257ef0c1ce42d4a66e74202b093606c68fa8e6383b9
+- name: docker.io/bitnami/mysqld-exporter
+  # 0.13.0-debian-10-r12
+  digest: sha256:6851348a52762a77fec89a7bc101e3984a1a7ec5322ffd350bc81a9f3d6e4d11
+
+patchesStrategicMerge:
+  # for namespace to match the value at the top of this file
+- |-
+  apiVersion: apps/v1
+  kind: StatefulSet
+  metadata:
+    name: ystack-mariadb-galera
+  spec:
+    template:
+      spec:
+        containers:
+        - name: "mariadb-galera"
+          env:
+          - name: MARIADB_GALERA_CLUSTER_ADDRESS
+            value: "gcomm://ystack-mariadb-galera-headless.mysqltest.svc.cluster.local"

@@ -1,4 +1,8 @@
-bases:
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
 - ../scale-1
+
 patchesStrategicMerge:
 - ephemeral.yaml

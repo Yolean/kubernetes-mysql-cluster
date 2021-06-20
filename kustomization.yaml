@@ -1,6 +1,0 @@
-resources:
-- 10conf-d.yml
-- 20mariadb-service.yml
-- 21mariadb-ready-service.yml
-- 30mysql-service.yml
-- 50mariadb.yml
