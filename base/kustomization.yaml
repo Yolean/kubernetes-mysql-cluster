@@ -4,6 +4,9 @@ kind: Kustomization
 # See also the override below
 namespace: mysqltest
 
+commonLabels:
+  app.kubernetes.io/managed-by: unhelm
+
 resources:
 - github.com/Yolean/unhelm/mysql/mariadb-galera?ref=e9bf2b43b34ff4698d84bd9afa766ad6b2d35809
 - ./mysql-service.yaml
