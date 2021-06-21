@@ -7,7 +7,7 @@ commonLabels:
   app.kubernetes.io/managed-by: unhelm
 
 resources:
-- github.com/Yolean/unhelm/mysql/mariadb-galera?ref=b28227ecaf5003bb3aa4114fc84844667060b962
+- github.com/Yolean/unhelm/mysql/mariadb-galera?ref=606228e73ae4ca7d9fd0ec2820515a07b2b25cbd
 - ./mysql-service.yaml
 - ./podmonitor.yaml
 
