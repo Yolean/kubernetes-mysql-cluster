@@ -11,6 +11,16 @@ show_cluster_size() {
 
 k3d cluster create mysqltest --agents 3 --agents-memory 512M
 
+# https://github.com/Yolean/ystack/blob/master/bin/y-cluster-assert-install
+ctx=""
+OPERATOR_VERSION=5555f492df250168657b72bb8cb60bec071de71f
+KUBERNETES_ASSERT_VERSION=cb66d46758654b819d0d4402857122dca1884bcb
+kubectl $ctx create namespace monitoring
+kubectl $ctx -n default apply -f https://github.com/prometheus-operator/prometheus-operator/raw/$OPERATOR_VERSION/bundle.yaml
+kubectl wait $ctx -n default --for=condition=Ready pod -l app.kubernetes.io/name=prometheus-operator
+kubectl $ctx -n monitoring apply -k github.com/Yolean/kubernetes-assert/example-small?ref=$KUBERNETES_ASSERT_VERSION
+kubectl wait $ctx -n monitoring --for=condition=Ready pod --all
+
 kubectl create namespace mysqltest
 
 # With >1 replicas this leads to split brain despite ./base/bootstrap-no.yaml
@@ -57,6 +67,24 @@ echo "From zero we expect \"base\" to fail to start"
 kubectl -n mysqltest scale --replicas=0 statefulset/ystack-mariadb-galera
 kubectl -n mysqltest rollout status statefulset/ystack-mariadb-galera
 kubectl -n mysqltest apply -k ./base
+kubectl -n mysqltest rollout status --timeout=30s statefulset/ystack-mariadb-galera || echo "Timeout is expected"
+kubectl -n mysqltest get pods
+echo "Prometheus will now report absent(mysql_global_status_wsrep_cluster_size) == 1"
+
+kubectl -n mysqltest apply -k ./base-bootstrap
+sleep 5
+kubectl -n mysqltest get pods
+kubectl -n mysqltest logs -c mariadb-galera ystack-mariadb-galera-0
+
+echo "Using bootstrap-force, assuming that pod 0 has the latest writes"
+echo "To bootstrap from a different node use the helm chart"
+kubectl -n mysqltest apply -k ./base-bootstrap-force
 kubectl -n mysqltest rollout status statefulset/ystack-mariadb-galera
+show_cluster_size
+
+echo "Upon bootstrap success, apply the regular base to prevent more bootstrapping"
+kubectl -n mysqltest apply -k ./base
+kubectl -n mysqltest rollout status statefulset/ystack-mariadb-galera
+show_cluster_size
 
 k3d cluster delete mysqltest

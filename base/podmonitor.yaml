@@ -1,0 +1,15 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PodMonitor
+metadata:
+  name: mariadb-galera
+  labels:
+    prometheus: now
+spec:
+  jobLabel: app.kubernetes.io/name
+  namespaceSelector:
+    any: false
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: mariadb-galera
+  podMetricsEndpoints:
+  - port: metrics

@@ -10,6 +10,7 @@ commonLabels:
 resources:
 - github.com/Yolean/unhelm/mysql/mariadb-galera?ref=b28227ecaf5003bb3aa4114fc84844667060b962
 - ./mysql-service.yaml
+- ./podmonitor.yaml
 
 secretGenerator:
 - name: mariadb-auth
