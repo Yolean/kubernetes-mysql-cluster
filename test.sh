@@ -62,27 +62,27 @@ show_cluster_size
 kubectl -n mysqltest wait --for=condition=Ready --timeout=60s pod/ystack-mariadb-galera-1
 show_cluster_size
 
-echo "From zero we expect \"base\" to fail to start"
+echo "# From zero we expect \"base\" to fail to start"
 
 kubectl -n mysqltest scale --replicas=0 statefulset/ystack-mariadb-galera
 kubectl -n mysqltest rollout status statefulset/ystack-mariadb-galera
 kubectl -n mysqltest apply -k ./base
 kubectl -n mysqltest rollout status --timeout=30s statefulset/ystack-mariadb-galera || echo "Timeout is expected"
 kubectl -n mysqltest get pods
-echo "Prometheus will now report absent(mysql_global_status_wsrep_cluster_size) == 1"
+echo "# Prometheus will now report absent(mysql_global_status_wsrep_cluster_size) == 1"
 
 kubectl -n mysqltest apply -k ./base-bootstrap
 sleep 5
 kubectl -n mysqltest get pods
 kubectl -n mysqltest logs -c mariadb-galera ystack-mariadb-galera-0
 
-echo "Using bootstrap-force, assuming that pod 0 has the latest writes"
-echo "To bootstrap from a different node use the helm chart"
+echo "# Using bootstrap-force, assuming that pod 0 has the latest writes"
+echo "# To bootstrap from a different node use the helm chart"
 kubectl -n mysqltest apply -k ./base-bootstrap-force
 kubectl -n mysqltest rollout status statefulset/ystack-mariadb-galera
 show_cluster_size
 
-echo "Upon bootstrap success, apply the regular base to prevent more bootstrapping"
+echo "# Upon bootstrap success, apply the regular base to prevent more bootstrapping"
 kubectl -n mysqltest apply -k ./base
 kubectl -n mysqltest rollout status statefulset/ystack-mariadb-galera
 show_cluster_size

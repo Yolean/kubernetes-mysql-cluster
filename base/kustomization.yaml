@@ -1,7 +1,6 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 
-# See also the override below
 namespace: mysqltest
 
 commonLabels:
@@ -33,7 +32,7 @@ replicas:
 
 patchesStrategicMerge:
 - ./bootstrap-no.yaml
-  # for namespace to match the value at the top of this file
+  # The helm chart depends on the namespace for galera cluster address, but that's not necessary
 - |-
   apiVersion: apps/v1
   kind: StatefulSet
@@ -46,4 +45,4 @@ patchesStrategicMerge:
         - name: "mariadb-galera"
           env:
           - name: MARIADB_GALERA_CLUSTER_ADDRESS
-            value: "gcomm://ystack-mariadb-galera-headless.mysqltest.svc.cluster.local"
+            value: "gcomm://ystack-mariadb-galera-headless"
