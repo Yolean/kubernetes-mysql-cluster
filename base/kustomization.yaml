@@ -8,7 +8,7 @@ commonLabels:
   app.kubernetes.io/managed-by: unhelm
 
 resources:
-- github.com/Yolean/unhelm/mysql/mariadb-galera?ref=e9bf2b43b34ff4698d84bd9afa766ad6b2d35809
+- github.com/Yolean/unhelm/mysql/mariadb-galera?ref=b28227ecaf5003bb3aa4114fc84844667060b962
 - ./mysql-service.yaml
 
 secretGenerator:
@@ -20,13 +20,18 @@ secretGenerator:
 
 images:
 - name: docker.io/bitnami/mariadb-galera
-  # 10.5.10-debian-10-r26
-  digest: sha256:c8be8e01d6e5a594e1caa257ef0c1ce42d4a66e74202b093606c68fa8e6383b9
+  # 10.5.10-debian-10-r30
+  digest: sha256:3dc89271c5051abfaa33f0540b802a75f869570fa8b7ed7f5e7e6178df4b5653
 - name: docker.io/bitnami/mysqld-exporter
-  # 0.13.0-debian-10-r12
-  digest: sha256:6851348a52762a77fec89a7bc101e3984a1a7ec5322ffd350bc81a9f3d6e4d11
+  # 0.13.0-debian-10-r16
+  digest: sha256:55eb650f79f8c6b4936890261f6e4f966940c2e2eaadd4374b93dbe372a8dbd3
+
+replicas:
+- name: ystack-mariadb-galera
+  count: 3
 
 patchesStrategicMerge:
+- ./bootstrap-no.yaml
   # for namespace to match the value at the top of this file
 - |-
   apiVersion: apps/v1

@@ -1,0 +1,19 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: ystack-mariadb-galera
+spec:
+  replicas: 1
+  template:
+    spec:
+      containers:
+      - name: "mariadb-galera"
+        # https://github.com/bitnami/charts/blob/70822dd1aea385cad908462be5fc1004ef8b5e07/bitnami/mariadb-galera/templates/statefulset.yaml#L68
+        command:
+        - /opt/bitnami/scripts/mariadb-galera/entrypoint.sh
+        - /opt/bitnami/scripts/mariadb-galera/run.sh
+        env:
+        - name: MARIADB_GALERA_CLUSTER_BOOTSTRAP
+          value: "yes"
+        - name: MARIADB_GALERA_FORCE_SAFETOBOOTSTRAP
+          value: "no"
