@@ -50,10 +50,10 @@ spec:
           mountPath: /etc/mysql/conf.d
         - name: initdb
           mountPath: /docker-entrypoint-initdb.d
-        image: mariadb:10.2.36-bionic@sha256:b7be3ade3d5441c79b5c8a9cf2c2269f14bf420876a06def7d50e1763f042238
+        image: mariadb:10.5.11-focal@sha256:228d87496cc141569f5f692594823fb1d62a361b6f8848165eb4f953af5e3c3a
       containers:
       - name: mariadb
-        image: mariadb:10.2.36-bionic@sha256:b7be3ade3d5441c79b5c8a9cf2c2269f14bf420876a06def7d50e1763f042238
+        image: mariadb:10.5.11-focal@sha256:228d87496cc141569f5f692594823fb1d62a361b6f8848165eb4f953af5e3c3a
         ports:
         - containerPort: 3306
           name: mysql
@@ -96,7 +96,7 @@ spec:
         - name: initdb
           mountPath: /docker-entrypoint-initdb.d
       - name: metrics
-        image: prom/mysqld-exporter:v0.12.1@sha256:9fe9938c4ac9216cc24005144338f14fac4f604f139b481cc541bead008db3c1
+        image: prom/mysqld-exporter:v0.13.0@sha256:a8af600c3ef1c8df179b736b94d04dc5ec209be88407a4c1c1bd0fc6394f56e8
         env:
         - name: DATA_SOURCE_NAME
           value: root@(localhost:3306)/
