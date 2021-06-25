@@ -1,7 +1,6 @@
 kind: ConfigMap
 metadata:
   name: conf-d
-  namespace: mysql
 apiVersion: v1
 data:
   datadir.cnf: |
