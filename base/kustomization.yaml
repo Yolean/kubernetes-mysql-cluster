@@ -2,7 +2,6 @@ apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 
 resources:
-- conf-d.yaml
 - mariadb-service.yaml
 - mariadb-ready-service.yaml
 - mysql-service.yaml
