@@ -14,7 +14,7 @@ spec:
       labels:
         app: mariadb
     spec:
-      terminationGracePeriodSeconds: 30
+      terminationGracePeriodSeconds: 25
       initContainers:
       - name: init-config
         command: ['/bin/bash', '/etc/mysql/conf.d-configmap/init.sh']
