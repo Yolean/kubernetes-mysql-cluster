@@ -101,7 +101,8 @@ spec:
         - name: DATA_SOURCE_NAME
           value: root@(localhost:3306)/
         ports:
-        - containerPort: 9104
+        - name: metrics
+          containerPort: 9104
       volumes:
       - name: conf
         emptyDir: {}
