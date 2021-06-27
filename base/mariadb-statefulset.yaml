@@ -64,6 +64,10 @@ spec:
         - containerPort: 4568
           name: ist
         env:
+        - name: MYSQL_ROOT_HOST
+          value: "localhost"
+        - name: MYSQL_ALLOW_EMPTY_PASSWORD
+          value: "yes"
         - name: MYSQL_INITDB_SKIP_TZINFO
           value: "yes"
         readinessProbe:
