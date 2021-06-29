@@ -1,3 +1,0 @@
-bases:
-- github.com/Yolean/kubernetes-mysql-cluster?ref=549e804
-namespace: analytics

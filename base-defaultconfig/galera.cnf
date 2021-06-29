@@ -1,0 +1,25 @@
+#
+# * Galera-related settings
+#
+# https://mariadb.com/kb/en/mariadb/galera-cluster-system-variables/
+#
+[galera]
+# Mandatory settings
+wsrep_on=ON
+wsrep_provider="/usr/lib/galera/libgalera_smm.so"
+#init-new-cluster#wsrep_new_cluster=TRUE
+#init-recover#wsrep_recover=TRUE
+binlog_format=ROW
+default_storage_engine=InnoDB
+innodb_autoinc_lock_mode=2
+#init-wsrep#wsrep_cluster_address="gcomm://mariadb"
+wsrep-sst-method=rsync
+
+#
+# Allow server to accept connections on all interfaces.
+#
+bind-address=0.0.0.0
+#
+# Optional setting
+#wsrep_slave_threads=1
+#innodb_flush_log_at_trx_commit=0
