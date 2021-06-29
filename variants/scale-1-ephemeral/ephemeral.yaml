@@ -1,12 +1,11 @@
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
-  name: mariadb
-  namespace: mysql
+  name: ystack-mariadb-galera
 spec:
   template:
     spec:
       volumes:
-      - name: mysql
+      - name: data
         emptyDir: {}
   volumeClaimTemplates: []

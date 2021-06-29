@@ -1,0 +1,48 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: mysqltest
+
+commonLabels:
+  app.kubernetes.io/managed-by: unhelm
+
+resources:
+- github.com/Yolean/unhelm/mysql/mariadb-galera?ref=606228e73ae4ca7d9fd0ec2820515a07b2b25cbd
+- ./mysql-service.yaml
+- ./podmonitor.yaml
+
+secretGenerator:
+- name: mariadb-auth
+  literals:
+  - mariadb-root-password=TESTROOT
+  - mariadb-galera-mariabackup-password=TESTBACKUP
+  - mariadb-password=TESTMARIADB
+
+images:
+- name: docker.io/bitnami/mariadb-galera
+  # 10.5.10-debian-10-r30
+  digest: sha256:3dc89271c5051abfaa33f0540b802a75f869570fa8b7ed7f5e7e6178df4b5653
+- name: docker.io/bitnami/mysqld-exporter
+  # 0.13.0-debian-10-r16
+  digest: sha256:55eb650f79f8c6b4936890261f6e4f966940c2e2eaadd4374b93dbe372a8dbd3
+
+replicas:
+- name: ystack-mariadb-galera
+  count: 3
+
+patchesStrategicMerge:
+- ./bootstrap-no.yaml
+  # The helm chart depends on the namespace for galera cluster address, but that's not necessary
+- |-
+  apiVersion: apps/v1
+  kind: StatefulSet
+  metadata:
+    name: ystack-mariadb-galera
+  spec:
+    template:
+      spec:
+        containers:
+        - name: "mariadb-galera"
+          env:
+          - name: MARIADB_GALERA_CLUSTER_ADDRESS
+            value: "gcomm://ystack-mariadb-galera-headless"

@@ -2,7 +2,7 @@ apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 
 resources:
-- ../scale-1
+- ../base-bootstrap
 
 patchesStrategicMerge:
-- ephemeral.yaml
+- ./bootstrap-force.yaml
