@@ -77,14 +77,6 @@ spec:
             - -ec
             - test ON = "$(mysql -e "SHOW STATUS LIKE 'wsrep_ready';" -N -B | sed 's/wsrep_ready\t//')"
           initialDelaySeconds: 30
-        livenessProbe:
-          exec:
-            command:
-            - mysql
-            - -e
-            - "SHOW DATABASES;"
-          # might need to be tweaked for large initial state transfers
-          initialDelaySeconds: 60
         volumeMounts:
         - name: mysql
           mountPath: /data
