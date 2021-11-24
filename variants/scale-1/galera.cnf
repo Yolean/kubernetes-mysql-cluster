@@ -1,0 +1,2 @@
+[galera]
+wsrep_on=OFF

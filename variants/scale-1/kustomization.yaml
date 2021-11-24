@@ -6,4 +6,10 @@ resources:
 
 patchesStrategicMerge:
 - replicas-1.yaml
-- wsrep-1.yaml
+- wsrep-off.yaml
+
+configMapGenerator:
+- name: conf-d
+  behavior: merge
+  files:
+  - galera.cnf
