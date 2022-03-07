@@ -85,7 +85,7 @@ spec:
         - name: initdb
           mountPath: /docker-entrypoint-initdb.d
       - name: metrics
-        image: prom/mysqld-exporter:v0.13.0@sha256:a8af600c3ef1c8df179b736b94d04dc5ec209be88407a4c1c1bd0fc6394f56e8
+        image: prom/mysqld-exporter:v0.14.0@sha256:eb6fe170738bf9181c51f5bc89f93adb26672ec49ffdcb22f55c24834003b45d
         env:
         - name: DATA_SOURCE_NAME
           # https://github.com/prometheus/mysqld_exporter#required-grants
