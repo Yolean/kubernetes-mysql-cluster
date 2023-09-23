@@ -96,7 +96,7 @@ spec:
         - name: initdb
           mountPath: /docker-entrypoint-initdb.d
       - name: metrics
-        image: prom/mysqld-exporter:v0.12.1@sha256:9fe9938c4ac9216cc24005144338f14fac4f604f139b481cc541bead008db3c1
+        image: prom/mysqld-exporter:v0.15.0@sha256:6b693c6c003bf51ffc2305f3d1a35d16da678bf421bfccca48ecc6077073634e
         env:
         - name: DATA_SOURCE_NAME
           value: root@(localhost:3306)/
