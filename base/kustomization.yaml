@@ -10,6 +10,6 @@ resources:
 
 images:
 - name: mariadb
-  newTag: 10.11.6-jammy@sha256:c19965acfdad93c2b2303d5f8fe6d8647875ad6ade51b24dba6de990acc415e7
+  newTag: 11.2.2-jammy@sha256:9da6213d1a5714c4585c9c0003c51510b320d6f60e53d78701fe1e194126249f
 - name: prom/mysqld-exporter
-  newTag: v0.14.0@sha256:eb6fe170738bf9181c51f5bc89f93adb26672ec49ffdcb22f55c24834003b45d
+  newTag: v0.15.1@sha256:7211a617ec657701ca819aa0ba28e1d5750f5bf2c1391b755cc4a48cc360b0fa
