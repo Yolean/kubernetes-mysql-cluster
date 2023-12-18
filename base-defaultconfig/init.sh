@@ -93,4 +93,4 @@ else
 fi
 
 # https://github.com/docker-library/mariadb/blob/master/10.2/docker-entrypoint.sh#L62
-mysqld --verbose --help --log-bin-index="$(mktemp -u)" | tee /tmp/mariadb-start-config | grep -e ^version -e ^datadir -e ^wsrep -e ^binlog -e ^character-set -e ^collation
+mysqld --verbose --help --log-bin-index="$(mktemp -u)" 2>&1 | tee /tmp/mariadb-start-config | grep -e ^version -e ^datadir -e ^wsrep -e ^binlog -e ^character-set -e ^collation
