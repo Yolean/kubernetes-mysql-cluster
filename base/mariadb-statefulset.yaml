@@ -2,7 +2,6 @@ apiVersion: apps/v1
 kind: StatefulSet
 metadata:
   name: mariadb
-  namespace: mysql
 spec:
   selector:
     matchLabels:
@@ -14,11 +13,8 @@ spec:
     metadata:
       labels:
         app: mariadb
-      annotations:
-        prometheus.io/scrape: "true"
-        prometheus.io/port: "9104"
     spec:
-      terminationGracePeriodSeconds: 30
+      terminationGracePeriodSeconds: 25
       initContainers:
       - name: init-config
         command: ['/bin/bash', '/etc/mysql/conf.d-configmap/init.sh']
@@ -51,10 +47,10 @@ spec:
           mountPath: /etc/mysql/conf.d
         - name: initdb
           mountPath: /docker-entrypoint-initdb.d
-        image: mariadb:10.2.36-bionic@sha256:b7be3ade3d5441c79b5c8a9cf2c2269f14bf420876a06def7d50e1763f042238
+        image: mariadb:10.5.19-focal@sha256:ce75a36261b12948b411f6debb71254d92889c8a06e2ebc34c761f90416b1024
       containers:
       - name: mariadb
-        image: mariadb:10.2.36-bionic@sha256:b7be3ade3d5441c79b5c8a9cf2c2269f14bf420876a06def7d50e1763f042238
+        image: mariadb:10.5.19-focal@sha256:ce75a36261b12948b411f6debb71254d92889c8a06e2ebc34c761f90416b1024
         ports:
         - containerPort: 3306
           name: mysql
@@ -81,14 +77,6 @@ spec:
             - -ec
             - test ON = "$(mysql -e "SHOW STATUS LIKE 'wsrep_ready';" -N -B | sed 's/wsrep_ready\t//')"
           initialDelaySeconds: 30
-        livenessProbe:
-          exec:
-            command:
-            - mysql
-            - -e
-            - "SHOW DATABASES;"
-          # might need to be tweaked for large initial state transfers
-          initialDelaySeconds: 60
         volumeMounts:
         - name: mysql
           mountPath: /data
@@ -97,12 +85,14 @@ spec:
         - name: initdb
           mountPath: /docker-entrypoint-initdb.d
       - name: metrics
-        image: prom/mysqld-exporter:v0.12.1@sha256:9fe9938c4ac9216cc24005144338f14fac4f604f139b481cc541bead008db3c1
+        image: prom/mysqld-exporter:v0.14.0@sha256:eb6fe170738bf9181c51f5bc89f93adb26672ec49ffdcb22f55c24834003b45d
         env:
         - name: DATA_SOURCE_NAME
-          value: root@(localhost:3306)/
+          # https://github.com/prometheus/mysqld_exporter#required-grants
+          value: exporter:exporter@tcp(127.0.0.1:3306)/
         ports:
-        - containerPort: 9104
+        - name: metrics
+          containerPort: 9104
       volumes:
       - name: conf
         emptyDir: {}

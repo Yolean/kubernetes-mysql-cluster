@@ -1,0 +1,20 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: mariadb
+spec:
+  template:
+    spec:
+      containers:
+      - name: mariadb
+        readinessProbe:
+          exec:
+            command:
+            - mysqladmin
+            - status
+      initContainers:
+      - name: init-config
+        env:
+        # So the init script can configure galera unconditionally; galera.cnf is overridden to disable wsrep
+        - name: WSREP_CLUSTER_ADDRESS
+          value: "gcomm://mariadb-0.mariadb"
