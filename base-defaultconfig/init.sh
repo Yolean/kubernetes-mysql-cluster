@@ -1,5 +1,5 @@
 #!/bin/bash
-set -x
+set -exo pipefail
 [ "$(pwd)" != "/etc/mysql/conf.d" ] && cp * /etc/mysql/conf.d/
 
 HOST_ID=${HOSTNAME##*-}
@@ -32,8 +32,8 @@ function wsrepForceBootstrap {
 
 if [ $HOST_ID -eq 0 ]; then
   echo "This is the 1st statefulset pod. Checking if the statefulset is down ..."
-  getent hosts mariadb-ready
-  [ $? -eq 2 ] && {
+  GETENT_EXIT=0; getent hosts mariadb-ready || GETENT_EXIT="$?"
+  [ $GETENT_EXIT -eq 2 ] && {
     # https://github.com/docker-library/mariadb/commit/f76084f0f9dc13f29cce48c727440eb79b4e92fa#diff-b0fa4b30392406b32de6b8ffe36e290dR80
     if [ ! -d "$DATADIR/mysql" ]; then
       echo "No database in $DATADIR; configuring $POD_NAME for initial start"
@@ -93,4 +93,4 @@ else
 fi
 
 # https://github.com/docker-library/mariadb/blob/master/10.2/docker-entrypoint.sh#L62
-mysqld --verbose --help --log-bin-index="$(mktemp -u)" | tee /tmp/mariadb-start-config | grep -e ^version -e ^datadir -e ^wsrep -e ^binlog -e ^character-set -e ^collation
+mysqld --verbose --help --log-bin-index="$(mktemp -u)" 2>&1 | tee /tmp/mariadb-start-config | grep -e ^version -e ^datadir -e ^wsrep -e ^binlog -e ^character-set -e ^collation

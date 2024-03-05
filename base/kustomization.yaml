@@ -1,3 +1,4 @@
+# yaml-language-server: $schema=https://json.schemastore.org/kustomization.json
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 
@@ -6,3 +7,9 @@ resources:
 - mariadb-ready-service.yaml
 - mysql-service.yaml
 - mariadb-statefulset.yaml
+
+images:
+- name: mariadb
+  newTag: 10.11.7-jammy@sha256:f94bd863dc16bf7b44957586d0c325462d4a65598d04ab952a9b73120a259b21
+- name: prom/mysqld-exporter
+  newTag: v0.14.0@sha256:eb6fe170738bf9181c51f5bc89f93adb26672ec49ffdcb22f55c24834003b45d
