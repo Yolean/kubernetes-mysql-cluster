@@ -39,7 +39,7 @@ jobs:
       id: imageMariadbTo
       uses: mikefarah/yq@v4.44.1
       with:
-        cmd: yq '.images[0].newName + ":" + .images[0].newTag' 'base/kustomization.yaml'
+        cmd: yq '.images[0].newName + ":" + .images[0].newTag | sub("(.*)@.*", "${1}")' 'base/kustomization.yaml'
     -
       name: Get exporter docker hub image
       id: imageExporterFrom
@@ -51,7 +51,7 @@ jobs:
       id: imageExporterTo
       uses: mikefarah/yq@v4.44.1
       with:
-        cmd: yq '.images[1].newName + ":" + .images[1].newTag' 'base/kustomization.yaml'
+        cmd: yq '.images[1].newName + ":" + .images[1].newTag | sub("(.*)@.*", "${1}")' 'base/kustomization.yaml'
     -
       run: |
         crane cp ${{ steps.imageMariadbFrom.outputs.result }} ${{ steps.imageMariadbTo.outputs.result }}
