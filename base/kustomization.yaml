@@ -11,7 +11,7 @@ resources:
 images:
 - name: mariadb
   newName: ghcr.io/yolean/mariadb
-  newTag: 10.11.10-jammy@sha256:79cf033abf9089f27dd4c3e831cbef83048a52d6f52783930b647c56224d95c3
+  newTag: 10.11.13-jammy@sha256:e725b24af143c6b30e78eab99441e4cabac7494a69186effc2f506ea85401e2a
 - name: prom/mysqld-exporter
   newName: ghcr.io/yolean/mysqld-exporter
   newTag: v0.14.0@sha256:eb6fe170738bf9181c51f5bc89f93adb26672ec49ffdcb22f55c24834003b45d
