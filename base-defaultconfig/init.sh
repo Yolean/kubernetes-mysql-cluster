@@ -25,7 +25,8 @@ function wsrepRecover {
 }
 
 function wsrepForceBootstrap {
-  sed -i 's|safe_to_bootstrap: 0|safe_to_bootstrap: 1|' /data/db/grastate.dat
+  sed -i 's|safe_to_bootstrap: 0|safe_to_bootstrap: 1|' /data/db/grastate.dat \
+    || [ ! -f /data/db/grastate.dat ] && echo 'Patch failed due to no /data/db/grastate.dat, might not need to force bootstrap'
 }
 
 [[ $STATEFULSET_SERVICE = mariadb.* ]] || echo "WARNING: unexpected service name $STATEFULSET_SERVICE, Peer detection below may fail falsely."
