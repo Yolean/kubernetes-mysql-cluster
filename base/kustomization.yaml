@@ -14,4 +14,4 @@ images:
   newTag: 10.11.19-jammy@sha256:7f22313fc130a377a44999965bcb0a08dd5b21e8502824c1b864f792f9bc66ab
 - name: prom/mysqld-exporter
   newName: ghcr.io/yolean/mysqld-exporter
-  newTag: v0.14.0@sha256:eb6fe170738bf9181c51f5bc89f93adb26672ec49ffdcb22f55c24834003b45d
+  newTag: v0.20.0@sha256:abed8dac117b4ae5b70757f988e44795935b9a72c3b58d720c67ba688f8cb79e

@@ -89,10 +89,13 @@ spec:
           mountPath: /docker-entrypoint-initdb.d
       - name: metrics
         image: prom/mysqld-exporter
+        args:
+        - --mysqld.address=127.0.0.1:3306
+        - --mysqld.username=exporter
         env:
-        - name: DATA_SOURCE_NAME
+        - name: MYSQLD_EXPORTER_PASSWORD
           # https://github.com/prometheus/mysqld_exporter#required-grants
-          value: exporter:exporter@tcp(127.0.0.1:3306)/
+          value: exporter
         ports:
         - name: metrics
           containerPort: 9104
